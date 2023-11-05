@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebRTC Multi-User Chat Test</title>
+</head>
+<body>
+    <h1>WebRTC Multi-User Chat Test</h1>
+    <button id="createRoomButton">Create Room</button>
+    <button id="joinRoomButton">Join Room</button>
+    <input type="text" id="roomNumberInput" placeholder="Enter Room Number">
+
+    <p>Room Number: <span id="roomNumberDisplay">Waiting...</span></p>
+    
+    <video id="localVideo" playsinline autoplay muted></video>
+    <video id="remoteVideo" playsinline autoplay></video>
+
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
