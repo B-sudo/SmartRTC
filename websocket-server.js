@@ -49,12 +49,25 @@ function handleJoinRoom(ws, room) {
         for (const client of rooms.get(room)) {
             if (client !== ws) {
                 sendTo(ws, { type: 'new-user' });
-                sendTo(client, { type: 'new-user' });
+                //sendTo(client, { type: 'new-user' });
                 createPeerConnection(ws, client);
             }
         }
     } else {
         ws.send(JSON.stringify({ type: 'room-not-found' }));
+        console.log(`room-not-found`);
+    }
+}
+
+function handleWebRTCMessage(ws, message) {
+    const room = [...rooms].find(([_, clients]) => clients.has(ws));
+    if (room) {
+        for (const client of room[1]) {
+            if (client !== ws) {
+                // Broadcast the offer to the relevant recipient(s)
+                sendTo(client, message);
+            }
+        }
     }
 }
 
