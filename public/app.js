@@ -6,11 +6,18 @@ const roomNumberInput = document.getElementById("roomNumberInput");
 const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
 const activeUsersList = document.getElementById("activeUsersList"); // Assuming you have an element for the user list
+const sendMessageButton = document.getElementById("sendMessageButton");
+const messageInput = document.getElementById("messageInput");
+const messageBox = document.getElementById("messageBox");
+const chatSection = document.getElementById("chatSection");
 
 let roomNumber;
 let localStream;
 const peerConnections = new Map();
 let userId; // New: User ID for the current client
+
+/** variable for chat communication with webrtc*/
+let dataChannel;
 
 const ws = new WebSocket(serverURL);
 
@@ -23,18 +30,30 @@ ws.addEventListener("message", (event) => {
     const message = JSON.parse(event.data);
     console.log("A message of Type:", message.type);
     handleSignalingData(message);
+
+    // update client ui if needed
     if (message.type === 'room-created') {
         document.getElementById("roomNumberDisplay").textContent = message.room;
         userId = message.userId; // New: Set the user ID
         updateActiveUsersList(userId);
+
+        // enable room elements
+        chatSection.classList.remove("chat-section-hidden");
     } 
     else if (message.type === 'room-joined') {
         document.getElementById("roomNumberDisplay").textContent = message.room;
         userId = message.userId; // New: Set the user ID
         updateActiveUsersList(userId);
-    } else if (message.type === 'new-user' || message.type === "offer") {
+
+        // enable room elements
+        chatSection.classList.remove("chat-section-hidden");
+    }
+    else if (message.type === 'new-user' || message.type === "offer") {
         updateActiveUsersList(message.userId);
-}
+    }
+    else if (message.type === 'get-text') {
+        updateChatboxContent(message);
+    }
 });
 
 ws.addEventListener("close", () => {
@@ -70,11 +89,28 @@ joinRoomButton.addEventListener("click", () => {
     }
 });
 
+sendMessageButton.addEventListener("click", () => {
+    // send the text to server (json: type:'send-text', value:'xxx')
+    const msg = messageInput.value;
+    ws.send(JSON.stringify({type: 'send-text', value: msg}));
+
+    // update local ui
+    messageBox.value += "User " + userId + ": " + msg + '\n'
+    messageInput.value = "";
+});
+
 // Update the active user list on the client
 function updateActiveUsersList(userId) {
     const listItem = document.createElement("li");
     listItem.textContent = `User ${userId}`;
     activeUsersList.appendChild(listItem);
+}
+
+function updateChatboxContent(message)
+{
+    console.log(message);
+
+    messageBox.value += "User " + message.fromUserId + ": " + message.value + '\n';
 }
 
 function createPeerConnection(targetUserId) {

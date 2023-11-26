@@ -1,0 +1,72 @@
+/* Reset some default styles */
+body, h1, h2, p {
+    margin: 0;
+    padding: 0;
+}
+
+/* Mobile-first styles */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    background-color: #0066cc;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
+
+.main-content {
+    margin-top: 20px;
+}
+
+.chat-section-hidden {
+    visibility: hidden;
+}
+
+.msg-box {
+    width: 100%;
+}
+
+.msg-input {
+    margin-top: 15px;
+    width: 100%;
+}
+
+.msg-button {
+    margin-top: 15px;
+}
+
+/* Responsive styles */
+@media (min-width: 768px) {
+    .container {
+        max-width: 768px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 1024px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1440px;
+    }
+}
+
+@media (min-width: 1660px) {
+    .container {
+        max-width: 1660px;
+    }
+}

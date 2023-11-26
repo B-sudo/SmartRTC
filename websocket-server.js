@@ -24,6 +24,8 @@ wss.on('connection', (ws) => {
             handleJoinRoom(ws, data.room);
         } else if (data.type === 'offer' || data.type === 'answer' || data.type === 'ice-candidate') {
             handleWebRTCMessage(ws, data);
+        } else if (data.type === 'send-text') {
+            handleTextMessage(ws, data);
         }
     });
 
@@ -66,14 +68,15 @@ function handleJoinRoom(ws, room) {
 }
 
 function handleWebRTCMessage(ws, message) {
-    console.log(rooms);
+    //console.log(rooms);
     const room = [...rooms].find(([_, clients]) => clients.has(ws));
     if (message.type == 'ice-candidate') {
         console.log(" message ice");
     }
     if (room) {
         for (const client of room[1]) {
-            console.log(client, ws);
+            //console.log(client, ws);
+            //console.log(room[1]);
             if (client !== ws) {
                 if (message.type == 'ice-candidate') {
                     console.log("Broadcast icecandidate");
@@ -90,6 +93,20 @@ function handleWebRTCMessage(ws, message) {
     }
     else {
         console.log("No such room");
+    }
+}
+
+function handleTextMessage(ws, data) {
+    console.log("get the text msg from a client");
+    console.log(data);
+    const sent_room = ws.roomId;
+    const sent_user = ws.userId;
+
+    // broadcast to other users in the room
+    for (const client_ws of rooms.get(sent_room)) {
+        if (client_ws !== ws) {
+            sendTo(client_ws, { type: 'get-text', fromUserId: sent_user, value: data.value });
+        }
     }
 }
 

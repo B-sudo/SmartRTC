@@ -1,19 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebRTC Multi-User Chat Test</title>
+    <title>Smart RTC</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <h1>WebRTC Multi-User Chat Test</h1>
-    <button id="createRoomButton">Create Room</button>
-    <button id="joinRoomButton">Join Room</button>
-    <input type="text" id="roomNumberInput" placeholder="Enter Room Number">
+    <div class="container">
+        <header>
+            <h1>Smart RTC</h1>
+        </header>
 
-    <p>Room Number: <span id="roomNumberDisplay">Waiting...</span></p>
-    
-    <video id="localVideo" playsinline autoplay muted></video>
-    <div id="activeUsersList"></div>
-    <div id="remoteVideo" playsinline autoplay></div>
+        <div class="main-content">
+            <div class="row">
+                <div class="col-8">
+                    <button id="createRoomButton">Create Room</button>
+                    <button id="joinRoomButton">Join Room</button>
+                    <input type="text" id="roomNumberInput" placeholder="Enter Room Number">
+
+                    <p>Room Number: <span id="roomNumberDisplay">Waiting...</span></p>
+
+                    <video id="localVideo" playsinline autoplay muted></video>
+                    <div id="activeUsersList"></div>
+                    <div id="remoteVideo" playsinline autoplay></div>
+                </div>
+
+                <div id="chatSection" class="col chat-section-hidden">
+                    <h5 class="row">Chat Box</h5>
+                    <textarea id="messageBox" class="row msg-box message" rows="10" cols="50" readonly></textarea>
+                    <input id="messageInput" class="row msg-input" type="text" placeholder="Type your message">
+                    <button id="sendMessageButton" class="row msg-button">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <script src="app.js"></script>
