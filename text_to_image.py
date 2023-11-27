@@ -22,4 +22,5 @@ else:
 save_url = os.path.join("public/assets", f"{int(file_name)+1}.jpg".zfill(8))
 image.save(save_url)
 
-print(save_url)
+read_url= os.path.join("assets", f"{int(file_name)+1}.jpg".zfill(8))
+print(read_url)
