@@ -106,13 +106,8 @@ function handleText2Image(ws, data){
     const sent_room = ws.roomId;
     const sent_user = ws.userId;
 
-    // Activate your conda environment (replace 'your_env_name' with your actual environment name)
-    const activateConda = spawn('conda', ['activate', 'smartRTC']);
-
-    activateConda.on('close', (code) => {
-        if (code === 0) {
-    // Call the Python script to generate the image URL
-    const pythonProcess = spawn('python', ['text_to_image.py', data.value]);
+    // Activate conda environment and run
+    const pythonProcess = spawn('conda', ['run', '-n', 'smartRTC', 'python', 'text_to_image.py', data.value]);
 
     let imageUrl = ''
 
@@ -130,11 +125,7 @@ function handleText2Image(ws, data){
     pythonProcess.stderr.on('data', (data) => {
         console.error(`Error from Python script: ${data}`);
     });
-    } else {
-        console.error('Error activating conda environment.');
     }
-});
-}
 
 function handleTextMessage(ws, data) {
     console.log("get the text msg from a client");
