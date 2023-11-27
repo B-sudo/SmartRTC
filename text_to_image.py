@@ -14,7 +14,7 @@ pipe = pipe.to("cuda")
 image = pipe(prompt).images[0]
 
 os.makedirs("public/assets", exist_ok=True)
-if len(os.listdir("assets")) == 0:
+if len(os.listdir("public/assets")) == 0:
     file_name = -1
 else:
     file_name = sorted(os.listdir("public/assets"))[-1].split(".")[0]
