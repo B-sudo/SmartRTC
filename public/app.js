@@ -10,6 +10,10 @@ const sendMessageButton = document.getElementById("sendMessageButton");
 const messageInput = document.getElementById("messageInput");
 const messageBox = document.getElementById("messageBox");
 const chatSection = document.getElementById("chatSection");
+const text2ImgSection = document.getElementById("text2ImageSection");
+const text2ImgImage = document.getElementById("text2imgImage");
+const text2ImgButton = document.getElementById("text2imgButton");
+const text2ImgInput = document.getElementById("text2imgInput");
 
 let roomNumber;
 let localStream;
@@ -39,7 +43,8 @@ ws.addEventListener("message", (event) => {
 
         // enable room elements
         chatSection.classList.remove("chat-section-hidden");
-    } 
+        text2ImgSection.classList.remove("text2image-section-hidden");
+    }
     else if (message.type === 'room-joined') {
         document.getElementById("roomNumberDisplay").textContent = message.room;
         userId = message.userId; // New: Set the user ID
@@ -47,6 +52,7 @@ ws.addEventListener("message", (event) => {
 
         // enable room elements
         chatSection.classList.remove("chat-section-hidden");
+        text2ImgSection.classList.remove("text2image-section-hidden");
     }
     else if (message.type === 'new-user' || message.type === "offer") {
         updateActiveUsersList(message.userId);

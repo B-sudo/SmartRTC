@@ -29,7 +29,15 @@ body {
     margin-top: 20px;
 }
 
+.chat-image-section {
+
+}
+
 .chat-section-hidden {
+    visibility: hidden;
+}
+
+.text2image-section-hidden {
     visibility: hidden;
 }
 
@@ -44,6 +52,11 @@ body {
 
 .msg-button {
     margin-top: 15px;
+    margin-bottom: 50px;
+}
+
+.display-image {
+    width: 50%;
 }
 
 /* Responsive styles */
