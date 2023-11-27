@@ -1,7 +1,7 @@
 {
-  "name": "WebRTC",
+  "name": "webrtc",
   "version": "1.0.0",
-  "description": "",
+  "description": "npm init -y",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,5 +12,6 @@
   "dependencies": {
     "express": "^4.18.2",
     "ws": "^8.14.2"
-  }
+  },
+  "devDependencies": {}
 }
