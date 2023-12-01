@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 const http = require('http');
 const express = require('express');
 const path = require('path');
+const { spawn } = require('child_process');
 
 const app = express();
 const server = http.createServer(app);
@@ -26,6 +27,8 @@ wss.on('connection', (ws) => {
             handleWebRTCMessage(ws, data);
         } else if (data.type === 'send-text') {
             handleTextMessage(ws, data);
+        } else if (data.type === 'text2image-sent') {
+            handleText2Image(ws, data);
         }
     });
 
@@ -96,6 +99,34 @@ function handleWebRTCMessage(ws, message) {
     }
 }
 
+
+function handleText2Image(ws, data){
+
+    console.log(data)
+    const sent_room = ws.roomId;
+    const sent_user = ws.userId;
+
+    // Activate conda environment and run
+    const pythonProcess = spawn('conda', ['run', '-n', 'smartRTC', 'python', 'text_to_image.py', data.value]);
+
+    let imageUrl = ''
+
+    pythonProcess.stdout.on('data', (data) => {
+        const lines = data.toString().split('\n');
+        // Update imageUrl with the last line received
+        imageUrl = lines[lines.length - 2].trim();
+
+        // Broadcast the image URL to other users in the room
+        for (const client_ws of rooms.get(sent_room)) {
+            sendTo(client_ws, { type: 'text2image-rcvd', fromUserId: sent_user, imageUrl });
+        }
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+        console.error(`Error from Python script: ${data}`);
+    });
+    }
+
 function handleTextMessage(ws, data) {
     console.log("get the text msg from a client");
     console.log(data);
@@ -115,6 +146,8 @@ function generateRoomId() {
     return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
+const fs = require('fs');
+
 function handleLeaveRoom(ws) {
     const room = ws.roomId;
     if (rooms.has(room)) {
@@ -129,7 +162,33 @@ function handleLeaveRoom(ws) {
         // If the room is empty, remove it
         if (rooms.get(room).size === 0) {
             rooms.delete(room);
+            // Delete the directory "public/assets" when the room is deleted
+            const assetsDirPath = path.join(__dirname, 'public', 'assets');
+            deleteDirectory(assetsDirPath);
         }
+    }
+
+}
+
+// Function to recursively delete a directory
+function deleteDirectory(directoryPath) {
+    if (fs.existsSync(directoryPath)) {
+        const files = fs.readdirSync(directoryPath);
+
+        for (const file of files) {
+            const filePath = path.join(directoryPath, file);
+            if (fs.statSync(filePath).isDirectory()) {
+                // Recursively delete subdirectories
+                deleteDirectory(filePath);
+            } else {
+                // Delete files
+                fs.unlinkSync(filePath);
+            }
+        }
+
+        // Delete the empty directory
+        fs.rmdirSync(directoryPath);
+        console.log(`Directory deleted: ${directoryPath}`);
     }
 }
 

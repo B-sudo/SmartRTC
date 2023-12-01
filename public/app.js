@@ -60,10 +60,20 @@ ws.addEventListener("message", (event) => {
     else if (message.type === 'get-text') {
         updateChatboxContent(message);
     }
+    else if (message.type === 'text2image-rcvd') {
+        updateWhiteBoard(message);
+    }
 });
 
 ws.addEventListener("close", () => {
     console.log('Disconnected from the signaling server');
+});
+
+
+text2ImgButton.addEventListener("click", () => {
+    // Send a "create-room" message to the server
+    ws.send(JSON.stringify({ type: 'text2image-sent', value: text2ImgInput.value }));
+
 });
 
 createRoomButton.addEventListener("click", () => {
@@ -104,6 +114,12 @@ sendMessageButton.addEventListener("click", () => {
     messageBox.value += "User " + userId + ": " + msg + '\n'
     messageInput.value = "";
 });
+
+
+function updateWhiteBoard(message) {
+    console.log(message)
+    text2ImgImage.src = message.imageUrl
+}
 
 // Update the active user list on the client
 function updateActiveUsersList(userId) {
