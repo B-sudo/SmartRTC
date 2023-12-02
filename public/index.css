@@ -59,6 +59,14 @@ body {
     width: 50%;
 }
 
+.invalid-text {
+    color: red;
+}
+
+.invalid-text-hidden {
+    visibility: hidden;
+}
+
 /* Responsive styles */
 @media (min-width: 768px) {
     .container {

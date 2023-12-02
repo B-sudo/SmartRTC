@@ -3,6 +3,8 @@ const serverURL = 'ws://localhost:8080';
 const createRoomButton = document.getElementById("createRoomButton");
 const joinRoomButton = document.getElementById("joinRoomButton");
 const roomNumberInput = document.getElementById("roomNumberInput");
+const roomNumberText = document.getElementById("roomNumberDisplay");
+const invalidInfo = document.getElementById("invalidInfo");
 const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
 const activeUsersList = document.getElementById("activeUsersList"); // Assuming you have an element for the user list
@@ -19,6 +21,7 @@ let roomNumber;
 let localStream;
 const peerConnections = new Map();
 let userId; // New: User ID for the current client
+let remoteVideoElement = null;
 
 /** variable for chat communication with webrtc*/
 let dataChannel;
@@ -46,13 +49,23 @@ ws.addEventListener("message", (event) => {
         text2ImgSection.classList.remove("text2image-section-hidden");
     }
     else if (message.type === 'room-joined') {
-        document.getElementById("roomNumberDisplay").textContent = message.room;
+        roomNumberText.textContent = message.room;
         userId = message.userId; // New: Set the user ID
         updateActiveUsersList(userId);
+        createRoomButton.disabled = true;
+        joinRoomButton.disabled = true;
+        roomNumberInput.disabled = true;
+        invalidInfo.classList.add("invalid-text-hidden");
 
         // enable room elements
         chatSection.classList.remove("chat-section-hidden");
         text2ImgSection.classList.remove("text2image-section-hidden");
+    }
+    else if (message.type === 'room-not-found')
+    {
+        invalidInfo.classList.remove("invalid-text-hidden");
+        invalidInfo.textContent = 'Room not found!';
+        console.log(`room not found`);
     }
     else if (message.type === 'new-user' || message.type === "offer") {
         updateActiveUsersList(message.userId);
@@ -62,6 +75,10 @@ ws.addEventListener("message", (event) => {
     }
     else if (message.type === 'text2image-rcvd') {
         updateWhiteBoard(message);
+    }
+    else if (message.type === 'user-left')
+    {
+        updateVideoList();
     }
 });
 
@@ -87,22 +104,28 @@ createRoomButton.addEventListener("click", () => {
 });
 
 joinRoomButton.addEventListener("click", () => {
+    // input validation
+    const roomNumber = roomNumberInput.value;
+    const parsedInt = parseInt(roomNumber, 10);
+    if (roomNumber.trim() === '' || isNaN(parsedInt) || !Number.isInteger(parsedInt))
+    {
+        invalidInfo.classList.remove("invalid-text-hidden");
+        invalidInfo.textContent = "Invalid room number!";
+        console.log(`invalid room number`);
+        return;
+    }
+
     // Disable the "Create Room" button and the "Join Room" button
+    /*invalidInfo.classList.add("invalid-text-hidden");
     createRoomButton.disabled = true;
     joinRoomButton.disabled = true;
-    roomNumberInput.disabled = true;
+    roomNumberInput.disabled = true;*/
 
-    // Use the entered room number to join the room
-    const roomNumber = roomNumberInput.value;
-    if (roomNumber) {
-        // Send a "join" message to the server
-        console.log(`Client joined room ${roomNumber}`);
-        ws.send(JSON.stringify({ type: 'join', room: roomNumber }));
-        setupLocalMedia();
-    }
-    else {
-        console.log(`No room number`);
-    }
+    // Send a "join" message to the server
+    //console.log(`Client joined room ${roomNumber}`);
+    ws.send(JSON.stringify({ type: 'join', room: roomNumber }));
+    //setupLocalMedia();
+
 });
 
 sendMessageButton.addEventListener("click", () => {
@@ -115,6 +138,9 @@ sendMessageButton.addEventListener("click", () => {
     messageInput.value = "";
 });
 
+function updateVideoList(message) {
+    // delete the corresponding user
+}
 
 function updateWhiteBoard(message) {
     console.log(message)
@@ -152,6 +178,13 @@ function createPeerConnection(targetUserId) {
     } else {
         console.error('Local stream is not properly initialized or has no tracks.');
     }
+}
+
+function deletePeerConnection(userId)
+{
+    let peerConnection = peerConnections.get(userId);
+    if (peerConnection)
+        peerConnection.close();
 }
 
 /*
@@ -201,7 +234,7 @@ function handleTrackEvent(event) {
         stream.getTracks().forEach(track => {
             console.log('Received track:', track.kind);
             if (track.kind == "video" && videoTrackProcess) {
-                const remoteVideoElement = document.createElement('video');
+                remoteVideoElement = document.createElement('video');
                 remoteVideoElement.srcObject = event.streams[0];
                 remoteVideoElement.autoplay = true;
                 remoteVideoElement.playsinline = true;
@@ -223,6 +256,7 @@ function handleSignalingData(data) {
             break;
         case 'user-left':
             // Handle the case when a user leaves the room
+            deletePeerConnection(data.userId);
             break;
         case 'offer':
             // Handle the offer received from another user
