@@ -21,7 +21,6 @@ let roomNumber;
 let localStream;
 const peerConnections = new Map();
 let userId; // New: User ID for the current client
-let remoteVideoElement = null;
 
 /** variable for chat communication with webrtc*/
 let dataChannel;
@@ -78,7 +77,7 @@ ws.addEventListener("message", (event) => {
     }
     else if (message.type === 'user-left')
     {
-        updateVideoList();
+        updateVideoList(message);
     }
 });
 
@@ -139,7 +138,23 @@ sendMessageButton.addEventListener("click", () => {
 });
 
 function updateVideoList(message) {
-    // delete the corresponding user
+    // delete the left user
+    const leftUserId = message.userId;
+    var videoItem = document.getElementById(`user-video-${leftUserId}`);
+    if (videoItem)
+    {
+        remoteVideo.removeChild(videoItem);
+        console.log(`remove video child item ${leftUserId}`);
+    }
+
+    // delete the active user list
+    var userItem = document.getElementById(`user-item-${leftUserId}`);
+    if (userItem)
+    {
+        activeUsersList.removeChild(userItem);
+        console.log(`remove child item ${leftUserId}`);
+    }
+
 }
 
 function updateWhiteBoard(message) {
@@ -150,6 +165,7 @@ function updateWhiteBoard(message) {
 // Update the active user list on the client
 function updateActiveUsersList(userId) {
     const listItem = document.createElement("li");
+    listItem.id = `user-item-${userId}`
     listItem.textContent = `User ${userId}`;
     activeUsersList.appendChild(listItem);
 }
@@ -169,7 +185,7 @@ function createPeerConnection(targetUserId) {
         localStream.getTracks().forEach(track => newPeerConnection.addTrack(track, localStream));
 
         newPeerConnection.onicecandidate = (event) => handleICECandidateEvent(event, targetUserId);
-        newPeerConnection.ontrack = handleTrackEvent;
+        newPeerConnection.ontrack = (event) => handleTrackEvent(event, targetUserId);
 
         peerConnections.set(targetUserId, newPeerConnection);
 
@@ -182,9 +198,9 @@ function createPeerConnection(targetUserId) {
 
 function deletePeerConnection(userId)
 {
-    let peerConnection = peerConnections.get(userId);
+    /*let peerConnection = peerConnections.get(userId);
     if (peerConnection)
-        peerConnection.close();
+        peerConnection.close();*/
 }
 
 /*
@@ -225,19 +241,19 @@ function handleICECandidateEvent(event) {
 }
 let videoTrackProcess = true;
 
-function handleTrackEvent(event) {
+function handleTrackEvent(event, userid) {
     // Add the remote video stream to the UI
-    console.log('handleTrackEvent');
-
+    console.log('handleTrackEvent for ' + userid);
     // Iterate through the tracks in the stream
     event.streams.forEach(stream => {
         stream.getTracks().forEach(track => {
             console.log('Received track:', track.kind);
             if (track.kind == "video" && videoTrackProcess) {
-                remoteVideoElement = document.createElement('video');
+                const remoteVideoElement = document.createElement('video');
                 remoteVideoElement.srcObject = event.streams[0];
                 remoteVideoElement.autoplay = true;
                 remoteVideoElement.playsinline = true;
+                remoteVideoElement.id = `user-video-${userid}`;
                 remoteVideo.appendChild(remoteVideoElement);
                 videoTrackProcess = false;
             }

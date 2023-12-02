@@ -156,7 +156,7 @@ function handleLeaveRoom(ws) {
 
         // Notify other participants in the room
         for (const client of rooms.get(room)) {
-            sendTo(client, { type: 'user-left' });
+            sendTo(client, { type: 'user-left', userId: ws.userId });
         }
 
         // If the room is empty, remove it
