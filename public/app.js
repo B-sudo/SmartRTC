@@ -22,6 +22,7 @@ let localStream;
 const peerConnections = new Map();
 let userId; // New: User ID for the current client
 
+
 /** variable for chat communication with webrtc*/
 let dataChannel;
 
