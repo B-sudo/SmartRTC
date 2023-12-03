@@ -232,11 +232,12 @@ async function setupLocalMedia() {
     }
   }
 
-function handleICECandidateEvent(event) {
+function handleICECandidateEvent(event, targetUserId) {
     console.log("handleICECandidateEvent", event);
     if (event.candidate) {
         // Send the ICE candidate to the other peers via the signaling server
-        const message = JSON.stringify({ type: 'ice-candidate', userId: userId, candidate: event.candidate });
+        const message = JSON.stringify({ type: 'ice-candidate', userId: targetUserId, candidate: event.candidate });
+        console.log(`send ice candidate from ${userId} to ${targetUserId}`);
         ws.send(message);
     }
 }
@@ -319,7 +320,8 @@ function handleOffer(offer, dest) {
             return peerConnections.get(dest).setLocalDescription(answer);
         })
         .then(() => {
-            console.log('ICE Gathering State (after setLocalDescription):', peerConnections.get(dest).iceGatheringState);
+            sendAnswer();
+            /*console.log('ICE Gathering State (after setLocalDescription):', peerConnections.get(dest).iceGatheringState);
             // Check if ICE gathering is complete before sending the answer
             if (peerConnections.get(dest).iceGatheringState === 'complete') {
                 sendAnswer();
@@ -328,10 +330,11 @@ function handleOffer(offer, dest) {
                 peerConnections.get(dest).addEventListener('icegatheringstatechange', () => {
                     console.log('ICE Gathering State (change):', peerConnections.get(dest).iceGatheringState);
                     if (peerConnections.get(dest).iceGatheringState === 'complete') {
+                        console.log("222");
                         sendAnswer();
                     }
                 });
-            }
+            }*/
         })
         .catch((error) => {
             console.error('Error handling offer:', error);
@@ -361,7 +364,7 @@ function handleAnswer(answer, dest) {
 }
 
 function handleICECandidate(candidate, dest) {
-    console.log('handleICECandidate');
+    console.log("get remote candidate");
     peerConnections.get(dest).addIceCandidate(new RTCIceCandidate(candidate))
         .catch((error) => {
             console.error('Error handling ICE candidate:', error);

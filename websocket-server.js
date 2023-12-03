@@ -73,19 +73,18 @@ function handleJoinRoom(ws, room) {
 function handleWebRTCMessage(ws, message) {
     //console.log(rooms);
     const room = [...rooms].find(([_, clients]) => clients.has(ws));
-    if (message.type == 'ice-candidate') {
-        console.log(" message ice");
-    }
+
     if (room) {
         for (const client of room[1]) {
             //console.log(client, ws);
             //console.log(room[1]);
             if (client !== ws) {
-                if (message.type == 'ice-candidate') {
+                if (message.type === 'ice-candidate') {
                     console.log("Broadcast icecandidate");
+                    message.userId = ws.userId;  // added (new)
                     sendTo(client, message);
                 }
-                else if (client.userId == message.userId) {
+                else if (client.userId === message.userId) {
                     // Broadcast the offer to the relevant recipient(s)
                     console.log('Transfer from ', ws.userId, " TO ", message.userId);
                     message.userId = ws.userId;
