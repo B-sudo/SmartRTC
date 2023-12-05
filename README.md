@@ -20,6 +20,7 @@ conda activate smartRTC
 
 conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia 
 pip install diffusers["torch"] transformers
+pip install Pillow
 ```
 Feel free to change the python version. 
 

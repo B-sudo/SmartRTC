@@ -16,6 +16,8 @@ const text2ImgSection = document.getElementById("text2ImageSection");
 const text2ImgImage = document.getElementById("text2imgImage");
 const text2ImgButton = document.getElementById("text2imgButton");
 const text2ImgInput = document.getElementById("text2imgInput");
+const img2ImgButton = document.getElementById("img2imgButton");
+const img2ImgInput = document.getElementById("img2imgInput");
 const imageDownloadButton = document.getElementById('imageDownloadButton');
 
 
@@ -83,7 +85,7 @@ ws.addEventListener("message", (event) => {
     else if (message.type === 'get-text') {
         updateChatboxContent(message);
     }
-    else if (message.type === 'text2image-rcvd') {
+    else if (message.type === 'text2image-rcvd' || message.type === 'img2img-rcvd') {
         updateWhiteBoard(message);
     }
     else if (message.type === 'user-left')
@@ -98,8 +100,12 @@ ws.addEventListener("close", () => {
 
 
 text2ImgButton.addEventListener("click", () => {
-    // Send a "create-room" message to the server
     ws.send(JSON.stringify({ type: 'text2image-sent', value: text2ImgInput.value }));
+
+});
+
+img2ImgButton.addEventListener("click", () => {
+    ws.send(JSON.stringify({ type: 'img2img-sent', value: img2ImgInput.value }));
 
 });
 
