@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 const http = require('http');
 const express = require('express');
 const path = require('path');
+const archiver = require('archiver');
 const { spawn } = require('child_process');
 
 const app = express();
@@ -162,7 +163,7 @@ function handleLeaveRoom(ws) {
         if (rooms.get(room).size === 0) {
             rooms.delete(room);
             // Delete the directory "public/assets" when the room is deleted
-            const assetsDirPath = path.join(__dirname, 'public', 'assets');
+            const assetsDirPath = path.join(__dirname, 'public', 'assets', room, 'images');
             deleteDirectory(assetsDirPath);
         }
     }
@@ -199,6 +200,38 @@ function createPeerConnection(ws1, ws2) {
 function sendTo(ws, message) {
     ws.send(JSON.stringify(message));
 }
+
+
+// Define a route to download the zipped directory
+app.get('/public/assets/:roomId/images', (req, res) => {
+    const roomId = req.params.roomId;
+    const directoryPath = path.join(__dirname, `public/assets/${roomId}/images`);
+    const zipFilePath = path.join(__dirname, `public/assets/${roomId}/images.zip`);
+
+    const output = fs.createWriteStream(zipFilePath);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    output.on('close', () => {
+        console.log(archive.pointer() + ' total bytes');
+        console.log('archiver has been finalized and the output file descriptor has closed.');
+
+        // Set appropriate headers for the response
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename=images.zip`);
+
+        // Send the zip file to the client
+        res.sendFile(zipFilePath, () => {
+            // After the file has been sent, delete it
+            fs.unlinkSync(zipFilePath);
+            console.log('Zip file deleted:', zipFilePath);
+        });
+    });
+
+    archive.pipe(output);
+    archive.directory(directoryPath, false);
+    archive.finalize();
+});
+
 
 server.listen(8080, () => {
     console.log('WebSocket server is running on port 8080');

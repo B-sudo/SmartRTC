@@ -4,6 +4,8 @@ npm install ws
 
 npm install express --save
 
+npm install archiver
+
 node websocket-server.js
 
 

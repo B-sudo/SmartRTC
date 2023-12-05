@@ -16,6 +16,8 @@ const text2ImgSection = document.getElementById("text2ImageSection");
 const text2ImgImage = document.getElementById("text2imgImage");
 const text2ImgButton = document.getElementById("text2imgButton");
 const text2ImgInput = document.getElementById("text2imgInput");
+const imageDownloadButton = document.getElementById('imageDownloadButton');
+
 
 let roomNumber;
 let localStream;
@@ -41,6 +43,7 @@ ws.addEventListener("message", (event) => {
     // update client ui if needed
     if (message.type === 'room-created') {
         document.getElementById("roomNumberDisplay").textContent = message.room;
+        roomNumber = message.room;
         userId = message.userId; // New: Set the user ID
         updateActiveUsersList(userId);
 
@@ -136,6 +139,10 @@ sendMessageButton.addEventListener("click", () => {
     // update local ui
     messageBox.value += "User " + userId + ": " + msg + '\n'
     messageInput.value = "";
+});
+
+imageDownloadButton.addEventListener('click', () => {
+    window.open(`/public/assets/${roomNumber}/images`);
 });
 
 function updateVideoList(message) {
