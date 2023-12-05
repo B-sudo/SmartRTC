@@ -21,6 +21,7 @@ const imageDownloadButton = document.getElementById('imageDownloadButton');
 
 let roomNumber;
 let localStream;
+let remoteStream;
 const peerConnections = new Map();
 let userId; // New: User ID for the current client
 
@@ -192,11 +193,11 @@ function updateChatboxContent(message)
 }
 
 function createPeerConnection(targetUserId) {
-    if (localStream && localStream.getTracks) {
+    if (remoteStream && remoteStream.getTracks) {
         const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
         const newPeerConnection = new RTCPeerConnection(configuration);
 
-        localStream.getTracks().forEach(track => newPeerConnection.addTrack(track, localStream));
+        remoteStream.getTracks().forEach(track => newPeerConnection.addTrack(track, remoteStream));
 
         newPeerConnection.onicecandidate = (event) => handleICECandidateEvent(event, targetUserId);
         newPeerConnection.ontrack = (event) => handleTrackEvent(event, targetUserId);
@@ -204,7 +205,7 @@ function createPeerConnection(targetUserId) {
         peerConnections.set(targetUserId, newPeerConnection);
 
         console.log(`Peer Connection Created with user ${targetUserId}`);
-        console.log(localStream);
+        console.log(remoteStream);
     } else {
         console.error('Local stream is not properly initialized or has no tracks.');
     }
@@ -230,6 +231,7 @@ function setupLocalMedia() {
         });
 }*/
 
+let remoteVideoTrack;
 let localVideoTrack;
 
 async function setupLocalMedia() {
@@ -249,34 +251,61 @@ async function setupLocalMedia() {
     } catch (e) {
       alert(`getUserMedia() error: ${e.name}`);
     }
+    try {
+        const remotestream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+        console.log('Received local stream');
+  
+        // Save the local video track for later use
+        remoteVideoTrack = remotestream.getVideoTracks()[0];
+
+        remoteStream = remotestream;
+  
+        console.log('Local Video Tracks:', localStream.getVideoTracks());
+  
+          console.log('Local Video Stream State:', localStream.readyState);
+      } catch (e) {
+        alert(`getUserMedia() error: ${e.name}`);
+      }
 }
 
 // Modify the function to change the resolution dynamically
 async function changeVideoResolution(newWidth, newHeight) {
-    if (localVideoTrack) {
+    if (remoteVideoTrack) {
         // Stop the current video track
-        localVideoTrack.stop();
+        remoteVideoTrack.stop();
 
         // Create a new video track with the desired resolution
-        const newVideoTrack = await navigator.mediaDevices.getUserMedia({
-            video: {
-                width: {ideal: newWidth},
-                height: {ideal: newHeight},
-            },
-        }).then(mediaStream => mediaStream.getVideoTracks()[0]);
+        //const newVideoTrack = await navigator.mediaDevices.getUserMedia({
+        //    video: {
+        //        width: {ideal: newWidth},
+        //        height: {ideal: newHeight},
+        //    },
+        //}).then(mediaStream => mediaStream.getVideoTracks()[0]);
+
+
+        const remotestream = await navigator.mediaDevices.getUserMedia({audio: true, video: {
+            width: {ideal: newWidth},
+            height: {ideal: newHeight},
+        },});
+        console.log('Received local stream');
+  
+        // Save the local video track for later use
+        remoteVideoTrack = remotestream.getVideoTracks()[0];
+
+        remoteStream = remotestream;
 
         // Replace the old track with the new one
-        localVideoTrack = newVideoTrack;
+        //remoteVideoTrack = newVideoTrack;
 
         // Replace the track in the peer connection
         for (const [key, peerConnection] of peerConnections.entries()) {
             const videoSender = peerConnection.getSenders().find(sender => sender.track.kind === 'video');
-            videoSender.replaceTrack(localVideoTrack);
+            videoSender.replaceTrack(remoteVideoTrack);
         }
         // Now, call sendOffer again with the updated resolution information
-        for (const [key, peerConnection] of peerConnections.entries()) {
-            sendOffer(key);
-        }
+        //for (const [key, peerConnection] of peerConnections.entries()) {
+        //    sendOffer(key);
+        //}
     }
 }
 
@@ -349,10 +378,10 @@ function sendOffer(dest) {
         })
         .then(() => {
             // Add the resolution information to the offer
-            offer.resolution = {
-                width: localVideoTrack.getSettings().width,
-                height: localVideoTrack.getSettings().height,
-            };
+            //offer.resolution = {
+            //    width: localVideoTrack.getSettings().width,
+            //    height: localVideoTrack.getSettings().height,
+            //};
 
             const message = JSON.stringify({type: 'offer', userId: dest, offer: peerConnections.get(dest).localDescription});
             ws.send(message);
