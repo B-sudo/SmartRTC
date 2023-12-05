@@ -23,6 +23,15 @@
 
                     <p>Room Number: <span id="roomNumberDisplay">Waiting...</span></p>
 
+                    <!-- Add input fields for width and height -->
+                    <label for="widthInput">Width:</label>
+                    <input type="number" id="widthInput" placeholder="Width">
+
+                    <label for="heightInput">Height:</label>
+                    <input type="number" id="heightInput" placeholder="Height">
+
+                    <button id="changeResolutionButton">Change Resolution</button>
+
                     <video id="localVideo" playsinline autoplay muted></video>
                     <div id="activeUsersList"></div>
                     <div id="remoteVideo" playsinline autoplay></div>
@@ -52,5 +61,22 @@
 
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <script src="app.js"></script>
+
+    <script>
+        // Add an event listener to the button
+        document.getElementById("changeResolutionButton").addEventListener("click", () => {
+            // Get the user input for width and height
+            const width = document.getElementById("widthInput").value;
+            const height = document.getElementById("heightInput").value;
+
+            // Check if both width and height are provided
+            if (width && height) {
+                // Call the changeVideoResolution function with user-provided width and height
+                changeVideoResolution(parseInt(width), parseInt(height));
+            } else {
+                alert("Please enter both width and height.");
+            }
+        });
+    </script>
 </body>
 </html>

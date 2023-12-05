@@ -230,11 +230,17 @@ function setupLocalMedia() {
         });
 }*/
 
+let localVideoTrack;
+
 async function setupLocalMedia() {
     console.log('Requesting local stream');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
       console.log('Received local stream');
+
+      // Save the local video track for later use
+      localVideoTrack = stream.getVideoTracks()[0];
+
       localVideo.srcObject = stream;
       localStream = stream;
       console.log('Local Video Tracks:', localStream.getVideoTracks());
@@ -243,7 +249,36 @@ async function setupLocalMedia() {
     } catch (e) {
       alert(`getUserMedia() error: ${e.name}`);
     }
-  }
+}
+
+// Modify the function to change the resolution dynamically
+async function changeVideoResolution(newWidth, newHeight) {
+    if (localVideoTrack) {
+        // Stop the current video track
+        localVideoTrack.stop();
+
+        // Create a new video track with the desired resolution
+        const newVideoTrack = await navigator.mediaDevices.getUserMedia({
+            video: {
+                width: {ideal: newWidth},
+                height: {ideal: newHeight},
+            },
+        }).then(mediaStream => mediaStream.getVideoTracks()[0]);
+
+        // Replace the old track with the new one
+        localVideoTrack = newVideoTrack;
+
+        // Replace the track in the peer connection
+        for (const [key, peerConnection] of peerConnections.entries()) {
+            const videoSender = peerConnection.getSenders().find(sender => sender.track.kind === 'video');
+            videoSender.replaceTrack(localVideoTrack);
+        }
+        // Now, call sendOffer again with the updated resolution information
+        for (const [key, peerConnection] of peerConnections.entries()) {
+            sendOffer(key);
+        }
+    }
+}
 
 function handleICECandidateEvent(event, targetUserId) {
     console.log("handleICECandidateEvent", event);
@@ -305,6 +340,7 @@ function handleSignalingData(data) {
     }
 }
 
+// Modify the sendOffer function to handle resolution changes
 function sendOffer(dest) {
     console.log('SendOffer');
     peerConnections.get(dest).createOffer()
@@ -312,7 +348,13 @@ function sendOffer(dest) {
             return peerConnections.get(dest).setLocalDescription(offer);
         })
         .then(() => {
-            const message = JSON.stringify({ type: 'offer', userId: dest, offer: peerConnections.get(dest).localDescription });
+            // Add the resolution information to the offer
+            offer.resolution = {
+                width: localVideoTrack.getSettings().width,
+                height: localVideoTrack.getSettings().height,
+            };
+
+            const message = JSON.stringify({type: 'offer', userId: dest, offer: peerConnections.get(dest).localDescription});
             ws.send(message);
             console.log('signaling state after sendOffer:', peerConnections.get(dest).signalingState);
         })
@@ -320,7 +362,6 @@ function sendOffer(dest) {
             console.error('Error creating and sending offer:', error);
         });
 }
-
 function handleOffer(offer, dest) {
     console.log('HandleOffer');
     peerConnections.get(dest).setRemoteDescription(new RTCSessionDescription(offer))
