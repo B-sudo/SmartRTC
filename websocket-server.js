@@ -107,7 +107,7 @@ function handleText2Image(ws, data){
     const sent_user = ws.userId;
 
     // Activate conda environment and run
-    const pythonProcess = spawn('conda', ['run', '-n', 'smartRTC', 'python', 'text_to_image.py', data.value]);
+    const pythonProcess = spawn('conda', ['run', '-n', 'yijia', 'python', 'text_to_image.py', data.value, sent_room]);
 
     let imageUrl = ''
 
