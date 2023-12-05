@@ -28,6 +28,12 @@ let userId; // New: User ID for the current client
 /** variable for chat communication with webrtc*/
 let dataChannel;
 
+/** variables for performance metric */
+let fpsPrevTime;
+let bpsPrevTime;
+let bpsPrevByteSent;
+let fpsPrevFrameCount;
+
 const ws = new WebSocket(serverURL);
 
 ws.addEventListener("open", () => {
@@ -377,3 +383,79 @@ function handleICECandidate(candidate, dest) {
             console.error('Error handling ICE candidate:', error);
         });
 }
+
+/** Networking Performance Metrics sending mbps, sending fps, bandwidth (mbps), latency(rtt),*/
+
+function getNetworkMetrics() {
+    for (const [key, value] of peerConnections.entries()) {
+        const videoSender = value.getSenders().find(sender => sender.track.kind === 'video');
+        videoSender.getStats().then(stats => {
+            stats.forEach(stat => {
+                if (stat.type === 'outbound-rtp') {
+
+                    // bitrate (bmps)
+                    const currentTime = new Date().getTime();
+                    const deltaTime1 = currentTime - bpsPrevTime;
+                    const deltaByteSent = stat.bytesSent - bpsPrevByteSent;
+
+                    const bps = (deltaByteSent * 8) / (deltaTime1 / 1000);
+                    const mbps = bps * 1e-6;
+
+                    console.log('Sending Bitrate:', mbps.toFixed(2), 'mbps');
+
+                    bpsPrevTime = currentTime;
+                    bpsPrevByteSent = stat.bytesSent;
+
+                    // framerate (fps)
+                    const deltaTime2 = currentTime - fpsPrevTime;
+                    const deltaFrameSent = stat.framesSent - fpsPrevFrameCount;
+
+                    const fps = deltaFrameSent / (deltaTime2 / 1000);
+
+                    console.log('Sending Video FPS:', fps.toFixed(2));
+
+                    fpsPrevTime = currentTime;
+                    fpsPrevFrameCount = stat.framesSent;
+                }
+
+                if (stat.type === 'candidate-pair' && stat.nominated) {
+
+                    // bandwidth
+                    const bytesSent = parseInt(stat.bytesSent);
+                    const bytesReceived = parseInt(stat.bytesReceived);
+
+                    const bandwidth = (bytesSent + bytesReceived) * 8 / (stat.totalRoundTripTime * 1000);
+                    const bandwidth_mbps = bandwidth * 1e-6;
+                    console.log('Estimated Bandwidth:', bandwidth_mbps.toFixed(2), 'mbps');
+
+                    // rtt
+                    const roundTripTime = parseFloat(stat.currentRoundTripTime);
+                    console.log('Round-Trip Time:', roundTripTime, 'ms');
+
+                    // packet loss rate
+                    const pktSent = stat.packetsSent;
+                    const pktLost = isNaN(stat.packetsLost) ? 0 : stat.packetsLost;
+
+                    const packetLossRate = (pktLost / pktSent) * 100;
+                    console.log('Packet Loss Rate:', packetLossRate.toFixed(0), '%');
+                }
+
+                if (stat.type === 'inbound-rtp' || stat.type === 'outbound-rtp') {
+
+                    // jitter
+                    const jitter = stat.jitter;
+
+                    if (!isNaN(jitter)) {
+                        console.log('Jitter:', jitter.toFixed(2), 'ms');
+                    }
+                    else {
+                        console.log('Jitter:', 0, 'ms');
+                    }
+                }
+            });
+        });
+        break;
+    }
+}
+
+setInterval(getNetworkMetrics, 1000);
