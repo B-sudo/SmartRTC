@@ -44,6 +44,8 @@ button, button:focus {
     padding: 5px 10px;
     outline: none;
     border: none;
+    margin-bottom: 20px;
+    margin-right: 10px;
 }
 
 button:hover {
@@ -57,6 +59,21 @@ input, input:focus {
     border: none;
     border-radius: 10px;
     padding: 5px 10px;
+}
+
+.video-audio-disable {
+    background-color: #eaeaea;
+    color: #ffffff;
+}
+
+.video-audio-disable:focus {
+    background-color: #eaeaea;
+    color: #ffffff;
+}
+
+.video-audio-disable:hover {
+    cursor: pointer;
+    background-color: #7743DB;
 }
 
 .main-content {

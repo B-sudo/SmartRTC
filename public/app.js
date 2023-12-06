@@ -20,6 +20,8 @@ const img2ImgButton = document.getElementById("img2imgButton");
 const img2ImgInput = document.getElementById("img2imgInput");
 const imageDownloadButton = document.getElementById('imageDownloadButton');
 const currentUserID = document.getElementById('currentUserID');
+const enableVideoButton = document.getElementById('enableVideoButton');
+const enableAudioButton = document.getElementById('enableAudioButton');
 
 
 let roomNumber;
@@ -100,6 +102,34 @@ ws.addEventListener("message", (event) => {
     {
         updateVideoList(message);
     }
+});
+
+enableVideoButton.addEventListener("click", () => {
+    const localVideoTrack = localStream.getVideoTracks()[0];
+    const remoteVideoTrack = remoteStream.getVideoTracks()[0];
+
+    const enable = localVideoTrack.enabled;
+    if (enable === true)
+        enableVideoButton.classList.add('video-audio-disable');
+    else
+        enableVideoButton.classList.remove('video-audio-disable');
+
+    localVideoTrack.enabled = !localVideoTrack.enabled;
+    remoteVideoTrack.enabled = !remoteVideoTrack.enabled;
+});
+
+enableAudioButton.addEventListener("click", () => {
+    const localAudioTrack = localStream.getAudioTracks()[0];
+    const remoteAudioTrack = remoteStream.getAudioTracks()[0];
+
+    const enable = localAudioTrack.enabled;
+    if (enable === true)
+        enableAudioButton.classList.add('video-audio-disable');
+    else
+        enableAudioButton.classList.remove('video-audio-disable');
+
+    remoteAudioTrack.enabled = !remoteAudioTrack.enabled;
+    localAudioTrack.enabled = !localAudioTrack.enabled;
 });
 
 ws.addEventListener("close", () => {
