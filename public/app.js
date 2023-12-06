@@ -17,6 +17,7 @@ const text2ImgImage = document.getElementById("text2imgImage");
 const text2ImgButton = document.getElementById("text2imgButton");
 const text2ImgInput = document.getElementById("text2imgInput");
 const imageDownloadButton = document.getElementById('imageDownloadButton');
+const currentUserID = document.getElementById('currentUserID');
 
 
 let roomNumber;
@@ -52,7 +53,10 @@ ws.addEventListener("message", (event) => {
         document.getElementById("roomNumberDisplay").textContent = message.room;
         roomNumber = message.room;
         userId = message.userId; // New: Set the user ID
-        updateActiveUsersList(userId);
+        //updateActiveUsersList(userId);
+
+        // set user id
+        currentUserID.textContent = userId;
 
         // enable room elements
         chatSection.classList.remove("chat-section-hidden");
@@ -61,7 +65,11 @@ ws.addEventListener("message", (event) => {
     else if (message.type === 'room-joined') {
         roomNumberText.textContent = message.room;
         userId = message.userId; // New: Set the user ID
-        updateActiveUsersList(userId);
+        //updateActiveUsersList(userId);
+
+        // set user id
+        currentUserID.textContent = userId;
+
         createRoomButton.disabled = true;
         joinRoomButton.disabled = true;
         roomNumberInput.disabled = true;
@@ -78,7 +86,7 @@ ws.addEventListener("message", (event) => {
         console.log(`room not found`);
     }
     else if (message.type === 'new-user' || message.type === "offer") {
-        updateActiveUsersList(message.userId);
+        //updateActiveUsersList(message.userId);
     }
     else if (message.type === 'get-text') {
         updateChatboxContent(message);
@@ -328,12 +336,28 @@ function handleTrackEvent(event, userid) {
         stream.getTracks().forEach(track => {
             console.log('Received track:', track.kind);
             if (track.kind == "video" && videoTrackProcess) {
+                // create container
+                const remoteVideoContainer = document.createElement('div');
+                remoteVideoContainer.id = `user-video-${userid}`;
+                remoteVideoContainer.classList.add('remote-video-container')
+
+                // create video
                 const remoteVideoElement = document.createElement('video');
                 remoteVideoElement.srcObject = event.streams[0];
                 remoteVideoElement.autoplay = true;
                 remoteVideoElement.playsinline = true;
-                remoteVideoElement.id = `user-video-${userid}`;
-                remoteVideo.appendChild(remoteVideoElement);
+                //remoteVideoElement.id = `user-video-${userid}`;
+                remoteVideoElement.classList.add('remote-video');
+
+                // create span
+                const idSpanElement = document.createElement('span');
+                idSpanElement.textContent = userid;
+                idSpanElement.classList.add('remote-video-text');
+
+                // add to html
+                remoteVideoContainer.appendChild(remoteVideoElement);
+                remoteVideoContainer.appendChild(idSpanElement);
+                remoteVideo.appendChild(remoteVideoContainer);
                 videoTrackProcess = false;
             }
             else if (track.kind == "video" && !videoTrackProcess) {

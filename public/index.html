@@ -9,49 +9,66 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Smart RTC</h1>
+        <header class="header-content">
+            <div class="logo-content">
+                <i class="fa fa-camera-retro fa-3x"></i>
+                <span class="logo-text">SmartRTC</span>
+            </div>
+
+            <div>
+                <!-- Add input fields for width and height -->
+                <label for="widthInput">Width:</label>
+                <input type="number" id="widthInput" placeholder="Width">
+
+                <label for="heightInput">Height:</label>
+                <input type="number" id="heightInput" placeholder="Height">
+
+                <button id="changeResolutionButton">Change Resolution</button>
+
+                <button id="imageDownloadButton">Download Images</button>
+
+            </div>
         </header>
 
         <div class="main-content">
             <div class="row">
                 <div class="col-8">
-                    <button id="createRoomButton">Create Room</button>
-                    <button id="joinRoomButton">Join Room</button>
-                    <input type="text" id="roomNumberInput" placeholder="Enter Room Number">
-                    <span id="invalidInfo" class="invalid-text invalid-text-hidden">Please input a valid room id!</span>
+                    <div class="self-control-content">
+                        <video id="localVideo" class="local-video" playsinline autoplay muted></video>
+                        <div>
+                            <p class="room-number-text">Room Number: <span id="roomNumberDisplay">Waiting...</span></p>
+                            <p class="room-number-text">User ID: <span id="currentUserID">Waiting...</span></p>
+                            <button id="createRoomButton">Create Room</button>
+                            <button id="joinRoomButton">Join Room</button>
+                            <input type="text" id="roomNumberInput" placeholder="Enter Room Number">
+                            <span id="invalidInfo" class="invalid-text invalid-text-hidden">Please input a valid room id!</span>
+                        </div>
+                    </div>
 
-                    <p>Room Number: <span id="roomNumberDisplay">Waiting...</span></p>
-
-                    <!-- Add input fields for width and height -->
-                    <label for="widthInput">Width:</label>
-                    <input type="number" id="widthInput" placeholder="Width">
-
-                    <label for="heightInput">Height:</label>
-                    <input type="number" id="heightInput" placeholder="Height">
-
-                    <button id="changeResolutionButton">Change Resolution</button>
-
-                    <video id="localVideo" playsinline autoplay muted></video>
-                    <div id="activeUsersList"></div>
-                    <div id="remoteVideo" playsinline autoplay></div>
+<!--                    <div id="activeUsersList"></div>-->
+                    <div id="remoteVideo" playsinline autoplay class="remote-video-content"></div>
                 </div>
 
                 <div class="col chat-image-section">
 
                     <div id="chatSection" class="chat-section-hidden col">
-                        <h5 class="row">Chat Box</h5>
+                        <div class="row chat-image-title">
+                            <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                            <span class="chat-image-title-text">Chat Box</span>
+                        </div>
                         <textarea id="messageBox" class="row msg-box message" rows="10" cols="50" readonly></textarea>
                         <input id="messageInput" class="row msg-input" type="text" placeholder="Type your message...">
                         <button id="sendMessageButton" class="row msg-button">Send</button>
                     </div>
 
                     <div id="text2ImageSection" class="text2image-section-hidden col">
-                        <h5 class="row">Creative Whiteboard</h5>
+                        <div class="row chat-image-title">
+                            <i class="fa fa-rocket" aria-hidden="true"></i>
+                            <span class="chat-image-title-text">Creative Whiteboard</span>
+                        </div>
                         <img id="text2imgImage" class="display-image row" src="whiteboard.jpeg"/>
                         <input id="text2imgInput" class="row msg-input" type="text" placeholder="Type your description for the image...">
                         <button id="text2imgButton" class="row msg-button">Send</button>
-                        <button id="imageDownloadButton">Download Images</button>                    
                     </div>
 
                 </div>
@@ -60,6 +77,7 @@
     </div>
 
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css" integrity="sha256-XoaMnoYC5TH6/+ihMEnospgm0J1PM/nioxbOUdnM8HY=" crossorigin="anonymous">
     <script src="app.js"></script>
 
     <script>
