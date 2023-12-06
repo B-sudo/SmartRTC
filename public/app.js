@@ -40,6 +40,7 @@ let fpsPrevTime;
 let bpsPrevTime;
 let bpsPrevByteSent;
 let fpsPrevFrameCount;
+let maxBandwidth;
 
 const ws = new WebSocket(serverURL);
 
@@ -98,14 +99,14 @@ ws.addEventListener("message", (event) => {
     }
     else if (message.type === 'text2image-rcvd' || message.type === 'img2img-rcvd') {
         updateWhiteBoard(message);
+        text2ImgButton.disabled = false;
+        img2ImgButton.disabled = false;
     }
     else if (message.type === 'disable-send-button') {
         text2ImgButton.disabled = true;
         img2ImgButton.disabled = true;
     }
     else if (message.type === 'enable-send-button') {
-        text2ImgButton.disabled = false;
-        img2ImgButton.disabled = false;
     }
     else if (message.type === 'user-left')
     {
@@ -201,9 +202,9 @@ createRoomButton.addEventListener("click", () => {
 
 joinRoomButton.addEventListener("click", () => {
     // input validation
-    const roomNumber = roomNumberInput.value;
-    const parsedInt = parseInt(roomNumber, 10);
-    if (roomNumber.trim() === '' || isNaN(parsedInt) || !Number.isInteger(parsedInt))
+    const roomnumber = roomNumberInput.value;
+    const parsedInt = parseInt(roomnumber, 10);
+    if (roomnumber.trim() === '' || isNaN(parsedInt) || !Number.isInteger(parsedInt))
     {
         invalidInfo.classList.remove("invalid-text-hidden");
         invalidInfo.textContent = "Invalid room number!";
@@ -215,11 +216,12 @@ joinRoomButton.addEventListener("click", () => {
     /*invalidInfo.classList.add("invalid-text-hidden");
     createRoomButton.disabled = true;
     joinRoomButton.disabled = true;
-    roomNumberInput.disabled = true;*/
+    roomnumberInput.disabled = true;*/
 
     // Send a "join" message to the server
-    //console.log(`Client joined room ${roomNumber}`);
-    ws.send(JSON.stringify({ type: 'join', room: roomNumber }));
+    //console.log(`Client joined room ${roomnumber}`);
+    ws.send(JSON.stringify({ type: 'join', room: roomnumber }));
+    roomNumber = roomnumber;
     //setupLocalMedia();
 
 });
@@ -236,7 +238,7 @@ sendMessageButton.addEventListener("click", () => {
 });
 
 imageDownloadButton.addEventListener('click', () => {
-    window.open(`/public/assets/${roomNumber}/images`);
+    window.open(`/assets/${roomNumber}/images`);
 });
 
 function updateVideoList(message) {
@@ -304,6 +306,7 @@ function deletePeerConnection(userId)
     let peerConnection = peerConnections.get(userId);
     if (peerConnection)
         peerConnection.close();
+    peerConnections.delete(userId);
 }
 
 /*
@@ -354,10 +357,19 @@ async function setupLocalMedia() {
       } catch (e) {
         alert(`getUserMedia() error: ${e.name}`);
       }
+
+      if (navigator.connection) {
+        const connection = navigator.connection;
+        console.log(`Effective connection type: ${connection.effectiveType}`);
+        console.log(`Downlink speed: ${connection.downlink} Mbps`);
+        console.log(`Downlink speed Max: ${connection.downlinkMax} Mbps`);
+        maxBandwidth = connection.downlink * 0.8 * 1000000;
+      }
 }
 
 // Modify the function to change the resolution dynamically
 async function changeVideoResolution(newWidth, newHeight) {
+    console.log("changeVideoResolution: ", newWidth, newHeight);
     if (remoteVideoTrack) {
         // Stop the current video track
         remoteVideoTrack.stop();
@@ -589,7 +601,7 @@ function dynamicUpdateResolution(bandwidth) {
         }
         else if (bandwidth_partition < 150000 && sendBandwidthLevel != 0) {
             sendBandwidthLevel = 0;
-            changeVideoResolution(30, 30);
+            changeVideoResolution(50, 50);
         }
     }
     else {
@@ -601,6 +613,12 @@ function dynamicUpdateResolution(bandwidth) {
 /** Networking Performance Metrics sending mbps, sending fps, bandwidth (mbps), latency(rtt),*/
 
 function getNetworkMetrics() {
+    if (navigator.connection) {
+        const connection = navigator.connection;
+        console.log(`Effective connection type: ${connection.effectiveType}`);
+        console.log(`Downlink speed: ${connection.downlink} Mbps`);
+      }
+
     for (const [key, value] of peerConnections.entries()) {
         const videoSender = value.getSenders().find(sender => sender.track.kind === 'video');
         videoSender.getStats().then(stats => {
@@ -638,11 +656,12 @@ function getNetworkMetrics() {
                     const bytesSent = parseInt(stat.bytesSent);
                     const bytesReceived = parseInt(stat.bytesReceived);
 
-                    const bandwidth = (bytesSent + bytesReceived) * 8 / (stat.totalRoundTripTime * 1000);
+                    //const bandwidth = (bytesSent + bytesReceived) * 8 / (stat.totalRoundTripTime * 1000);
+                    const bandwidth = maxBandwidth / remoteVideo.childElementCount;
                     const bandwidth_mbps = bandwidth * 1e-6;
                     console.log('Estimated Bandwidth:', bandwidth.toFixed(2), 'bps');
 
-                    dynamicUpdateResolution((bytesSent) * 8 / (stat.totalRoundTripTime * 1000));
+                    dynamicUpdateResolution(bandwidth);
 
                     // rtt
                     const roundTripTime = parseFloat(stat.currentRoundTripTime);
@@ -674,4 +693,16 @@ function getNetworkMetrics() {
     }
 }
 
-// setInterval(getNetworkMetrics, 1000);
+/*
+function probeResolution() {
+    //estimated R = 0.5; 0.6Mbps = 200*200*30
+    
+    if (sendBandwidthLevel < 5) {
+        sendBandwidthLevel = sendBandwidthLevel + 1;
+        changeVideoResolution(sendBandwidthLevel * 100, sendBandwidthLevel * 100);
+    }     
+
+}*/
+
+setInterval(getNetworkMetrics, 4000);
+//setInterval(probeResolution, 9000);
