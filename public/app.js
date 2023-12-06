@@ -526,7 +526,7 @@ function getNetworkMetrics() {
 
                     const bandwidth = (bytesSent + bytesReceived) * 8 / (stat.totalRoundTripTime * 1000);
                     const bandwidth_mbps = bandwidth * 1e-6;
-                    console.log('Estimated Bandwidth:', bandwidth_mbps.toFixed(2), 'mbps');
+                    console.log('Estimated Bandwidth:', bandwidth.toFixed(2), 'bps');
 
                     // rtt
                     const roundTripTime = parseFloat(stat.currentRoundTripTime);

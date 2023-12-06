@@ -1,5 +1,5 @@
-# import torch
-# from diffusers import StableDiffusionInstructPix2PixPipeline, EulerAncestralDiscreteScheduler
+import torch
+from diffusers import StableDiffusionInstructPix2PixPipeline, EulerAncestralDiscreteScheduler
 import os
 import sys
 from PIL import Image

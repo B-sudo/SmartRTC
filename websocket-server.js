@@ -110,13 +110,13 @@ function handleText2Image(ws, data){
     const sent_user = ws.userId;
 
     // Activate conda environment and run
-    const pythonProcess = spawn('conda', ['run', '-n', 'SmartRTC', 'python', 'text_to_image.py', data.value, sent_room]);
+    const pythonProcess = spawn('conda', ['run', '-n', 'smartRTC', 'python', 'text_to_image.py', data.value, sent_room]);
 
 
     pythonProcess.stdout.on('data', (data) => {
         const lines = data.toString().split('\n');
         // Update imageUrl with the last line received
-        imageUrl = lines[lines.length - 2].trim();
+        imageUrl = lines[lines.length - 3].trim();
 
         // Broadcast the image URL to other users in the room
         for (const client_ws of rooms.get(sent_room)) {
@@ -137,12 +137,12 @@ function handleImg2Img(ws, data){
     const sent_user = ws.userId;
 
     // Activate conda environment and run
-    const pythonProcess = spawn('conda', ['run', '-n', 'SmartRTC', 'python', 'image_to_image.py', imageUrl, data.value]);
+    const pythonProcess = spawn('conda', ['run', '-n', 'smartRTC', 'python', 'image_to_image.py', imageUrl, data.value]);
 
     pythonProcess.stdout.on('data', (data) => {
         const lines = data.toString().split('\n');
         // Update imageUrl with the last line received
-        imageUrl = lines[lines.length - 2].trim();
+        imageUrl = lines[lines.length - 3 ].trim();
 
         // Broadcast the image URL to other users in the room
         for (const client_ws of rooms.get(sent_room)) {
