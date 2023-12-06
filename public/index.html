@@ -39,9 +39,18 @@
                             <p class="room-number-text">Room Number: <span id="roomNumberDisplay">Waiting...</span></p>
                             <p class="room-number-text">User ID: <span id="currentUserID">Waiting...</span></p>
                             <button id="createRoomButton">Create Room</button>
-                            <button id="joinRoomButton">Join Room</button>
+                            <br>
                             <input type="text" id="roomNumberInput" placeholder="Enter Room Number">
+                            <button id="joinRoomButton">Join Room</button>
                             <span id="invalidInfo" class="invalid-text invalid-text-hidden">Please input a valid room id!</span>
+                            <br>
+                            <button id="enableVideoButton">
+                                <i class="fa fa-video-camera" aria-hidden="true"></i>
+                            </button>
+                            <button id="enableAudioButton">
+                                <i class="fa fa-volume-up" aria-hidden="true"></i>
+                            </button>
+                            <input type="range" class="volume-control-bar" id="volumeControl" name="volumeControl" min="0" max="1" step="0.01" value="1">
                         </div>
                     </div>
 
@@ -57,8 +66,10 @@
                             <span class="chat-image-title-text">Chat Box</span>
                         </div>
                         <textarea id="messageBox" class="row msg-box message" rows="10" cols="50" readonly></textarea>
-                        <input id="messageInput" class="row msg-input" type="text" placeholder="Type your message...">
-                        <button id="sendMessageButton" class="row msg-button">Send</button>
+                        <div class="row msg-div">
+                            <input id="messageInput" class="msg-input" type="text" placeholder="Type your message...">
+                            <button id="sendMessageButton" class="msg-button">Send</button>
+                        </div>
                     </div>
 
                     <div id="text2ImageSection" class="text2image-section-hidden col">
@@ -66,12 +77,19 @@
                             <i class="fa fa-rocket" aria-hidden="true"></i>
                             <span class="chat-image-title-text">Creative Whiteboard</span>
                         </div>
-                        <img id="text2imgImage" class="display-image row" src="whiteboard.jpeg"/>
-                        <input id="text2imgInput" class="row msg-input" type="text" placeholder="Type your description to generate a new image...">
-                        <button id="text2imgButton" class="row msg-button">Send</button>
 
-                        <input id="img2imgInput" class="row msg-input" type="text" placeholder="Type your instruction to edit current image...">
-                        <button id="img2imgButton" class="row msg-button">Send</button>
+                        <img id="text2imgImage" class="display-image row" src="whiteboard.jpeg"/>
+
+                        <div class="row msg-div">
+                            <input id="text2imgInput" class="msg-input" type="text" placeholder="Type your description to generate a new image...">
+                            <button id="text2imgButton" class="msg-button">Send</button>
+                        </div>
+
+                        <div class="row msg-div">
+                            <input id="img2imgInput" class="msg-input" type="text" placeholder="Type your instruction to edit current image...">
+                            <button id="img2imgButton" class="msg-button">Send</button>
+                        </div>
+
                     </div>
 
                 </div>

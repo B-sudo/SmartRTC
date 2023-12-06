@@ -35,6 +35,7 @@ body {
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
+    color: #050505;
 }
 
 button, button:focus {
@@ -44,6 +45,8 @@ button, button:focus {
     padding: 5px 10px;
     outline: none;
     border: none;
+    margin-bottom: 20px;
+    margin-right: 10px;
 }
 
 button:hover {
@@ -59,11 +62,29 @@ input, input:focus {
     padding: 5px 10px;
 }
 
+.video-audio-disable {
+    background-color: #eaeaea;
+    color: #ffffff;
+}
+
+.video-audio-disable:focus {
+    background-color: #eaeaea;
+    color: #ffffff;
+}
+
+.video-audio-disable:hover {
+    cursor: pointer;
+    background-color: #7743DB;
+}
+
 .main-content {
     margin-top: 20px;
 }
 
 .chat-image-section {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
 }
 
 .chat-image-title {
@@ -89,16 +110,21 @@ input, input:focus {
     outline: none;
     border-radius: 10px;
     border: 1px solid #555555;
+    overflow: auto;
+    resize: none;
 }
 
 .msg-input {
-    margin-top: 15px;
-    width: 100%;
+    /*margin-top: 15px;*/
+    width: 80%;
 }
 
 .msg-button {
-    margin-top: 15px;
-    margin-bottom: 50px;
+    margin: 0px 0px 0px 10px;
+}
+
+.msg-div {
+    margin-top: 10px;
 }
 
 .display-image {
@@ -177,8 +203,30 @@ input, input:focus {
     margin-left: 10px;
 }
 
+.volume-control-bar {
+    height: 10px;
+    padding: 0px;
+    outline: none;
+}
+
+.volume-control-bar:focus {
+    height: 10px;
+    outline: none;
+    padding: 0px;
+}
+
+.volume-control-bar:hover {
+    cursor: pointer;
+}
+
 
 /* Responsive styles */
+@media (min-width: 480px) {
+    .text {
+        font-size: 16px;
+        max-width: 480px;
+    }
+}
 @media (min-width: 768px) {
     .container {
         max-width: 768px;
@@ -200,5 +248,11 @@ input, input:focus {
 @media (min-width: 1660px) {
     .container {
         max-width: 1660px;
+    }
+}
+
+@media (min-width: 2000px) {
+    .container {
+        max-width: 2000px;
     }
 }
