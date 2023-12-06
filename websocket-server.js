@@ -12,6 +12,7 @@ const wss = new WebSocket.Server({ server });
 const rooms = new Map();
 
 let nextUserId = 1; // Initialize the next available user ID
+let imageUrl = 'whiteboard.jpeg'
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -30,6 +31,8 @@ wss.on('connection', (ws) => {
             handleTextMessage(ws, data);
         } else if (data.type === 'text2image-sent') {
             handleText2Image(ws, data);
+        } else if (data.type === 'img2img-sent') {
+            handleImg2Img(ws, data);
         }
     });
 
@@ -107,9 +110,8 @@ function handleText2Image(ws, data){
     const sent_user = ws.userId;
 
     // Activate conda environment and run
-    const pythonProcess = spawn('conda', ['run', '-n', 'yijia', 'python', 'text_to_image.py', data.value, sent_room]);
+    const pythonProcess = spawn('conda', ['run', '-n', 'SmartRTC', 'python', 'text_to_image.py', data.value, sent_room]);
 
-    let imageUrl = ''
 
     pythonProcess.stdout.on('data', (data) => {
         const lines = data.toString().split('\n');
@@ -125,7 +127,34 @@ function handleText2Image(ws, data){
     pythonProcess.stderr.on('data', (data) => {
         console.error(`Error from Python script: ${data}`);
     });
-    }
+}
+
+
+function handleImg2Img(ws, data){
+
+    console.log(data)
+    const sent_room = ws.roomId;
+    const sent_user = ws.userId;
+
+    // Activate conda environment and run
+    const pythonProcess = spawn('conda', ['run', '-n', 'SmartRTC', 'python', 'image_to_image.py', imageUrl, data.value]);
+
+    pythonProcess.stdout.on('data', (data) => {
+        const lines = data.toString().split('\n');
+        // Update imageUrl with the last line received
+        imageUrl = lines[lines.length - 2].trim();
+
+        // Broadcast the image URL to other users in the room
+        for (const client_ws of rooms.get(sent_room)) {
+            sendTo(client_ws, { type: 'img2img-rcvd', fromUserId: sent_user, imageUrl });
+        }
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+        console.error(`Error from Python script: ${data}`);
+    });
+}
+
 
 function handleTextMessage(ws, data) {
     console.log("get the text msg from a client");
