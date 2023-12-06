@@ -112,6 +112,7 @@ input, input:focus {
     border: 1px solid #555555;
     overflow: auto;
     resize: none;
+    padding: 10px;
 }
 
 .msg-input {

@@ -182,11 +182,13 @@ function handleTextMessage(ws, data) {
     console.log(data);
     const sent_room = ws.roomId;
     const sent_user = ws.userId;
+    const sent_time = data.timestamp;
 
     // broadcast to other users in the room
     for (const client_ws of rooms.get(sent_room)) {
         if (client_ws !== ws) {
-            sendTo(client_ws, { type: 'get-text', fromUserId: sent_user, value: data.value });
+            client_ws.send(JSON.stringify({type: 'get-text', fromUserId: sent_user, value: data.value, timestamp: sent_time}))
+            //sendTo(client_ws, { type: 'get-text', fromUserId: sent_user, value: data.value, time: "xxxx" });
         }
     }
 }

@@ -22,6 +22,7 @@ const imageDownloadButton = document.getElementById('imageDownloadButton');
 const currentUserID = document.getElementById('currentUserID');
 const enableVideoButton = document.getElementById('enableVideoButton');
 const enableAudioButton = document.getElementById('enableAudioButton');
+const chatDownloadButton = document.getElementById('chatDownloadButton');
 
 
 let roomNumber;
@@ -116,6 +117,32 @@ ws.addEventListener("close", () => {
     console.log('Disconnected from the signaling server');
 });
 
+chatDownloadButton.addEventListener("click", () => {
+    const textContent = messageBox.value;
+
+    // Create a Blob containing the content
+    var blob = new Blob([textContent], { type: "text/plain" });
+
+    // Create a temporary URL for the Blob
+    var url = URL.createObjectURL(blob);
+
+    // Create a link element
+    var link = document.createElement("a");
+
+    // Set the link's attributes
+    link.href = url;
+    link.download = "chat_history.txt";
+
+    // Append the link to the document
+    document.body.appendChild(link);
+
+    // Trigger a click event on the link to initiate the download
+    link.click();
+
+    // Remove the link from the document
+    document.body.removeChild(link);
+});
+
 enableVideoButton.addEventListener("click", () => {
     if (localStream) {
         const localVideoTrack = localStream.getVideoTracks()[0];
@@ -200,10 +227,11 @@ joinRoomButton.addEventListener("click", () => {
 sendMessageButton.addEventListener("click", () => {
     // send the text to server (json: type:'send-text', value:'xxx')
     const msg = messageInput.value;
-    ws.send(JSON.stringify({type: 'send-text', value: msg}));
+    const time = new Date();
+    ws.send(JSON.stringify({type: 'send-text', value: msg, timestamp: time.toLocaleTimeString()}));
 
     // update local ui
-    messageBox.value += "User " + userId + ": " + msg + '\n'
+    messageBox.value += `User ${userId} (${time.toLocaleTimeString()}) - ${msg}\n`;
     messageInput.value = "";
 });
 
@@ -248,7 +276,8 @@ function updateChatboxContent(message)
 {
     console.log(message);
 
-    messageBox.value += "User " + message.fromUserId + ": " + message.value + '\n';
+    //messageBox.value += "User " + message.fromUserId + ": " + message.value + '\n';
+    messageBox.value += `User ${message.fromUserId} (${message.timestamp}) - ${message.value}\n`;
 }
 
 function createPeerConnection(targetUserId) {
@@ -645,4 +674,4 @@ function getNetworkMetrics() {
     }
 }
 
-setInterval(getNetworkMetrics, 1000);
+// setInterval(getNetworkMetrics, 1000);
