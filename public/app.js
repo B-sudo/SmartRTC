@@ -235,9 +235,9 @@ function createPeerConnection(targetUserId) {
 
 function deletePeerConnection(userId)
 {
-    /*let peerConnection = peerConnections.get(userId);
+    let peerConnection = peerConnections.get(userId);
     if (peerConnection)
-        peerConnection.close();*/
+        peerConnection.close();
 }
 
 /*
@@ -492,6 +492,46 @@ function handleICECandidate(candidate, dest) {
         });
 }
 
+
+let sendBandwidthLevel = 5;
+
+function dynamicUpdateResolution(bandwidth) {
+    //estimated R = 0.5; 0.6Mbps = 200*200*30
+    if (remoteVideo) {
+        const activeUsersCount = remoteVideo.childElementCount;
+        const bandwidth_partition = bandwidth / activeUsersCount;
+
+        if (bandwidth_partition >= 3750000 && sendBandwidthLevel != 5) {
+            sendBandwidthLevel = 5;
+            changeVideoResolution(500, 500);
+        }
+        else if (bandwidth_partition < 3750000 && bandwidth_partition >= 2400000 && sendBandwidthLevel != 4) {
+            sendBandwidthLevel = 4;
+            changeVideoResolution(400, 400);
+        }
+        else if (bandwidth_partition < 2400000 && bandwidth_partition >= 1350000 && sendBandwidthLevel != 3) {
+            sendBandwidthLevel = 3;
+            changeVideoResolution(300, 300);
+        }
+        else if (bandwidth_partition < 1350000 && bandwidth_partition >= 600000 && sendBandwidthLevel != 2) {
+            sendBandwidthLevel = 2;
+            changeVideoResolution(200, 200);
+        }
+        else if (bandwidth_partition < 600000 && bandwidth_partition >= 150000 && sendBandwidthLevel != 1) {
+            sendBandwidthLevel = 1;
+            changeVideoResolution(100, 100);
+        }
+        else if (bandwidth_partition < 150000 && sendBandwidthLevel != 0) {
+            sendBandwidthLevel = 0;
+            changeVideoResolution(30, 30);
+        }
+    }
+    else {
+        console.log("No activeUsersList");
+    }
+
+}
+
 /** Networking Performance Metrics sending mbps, sending fps, bandwidth (mbps), latency(rtt),*/
 
 function getNetworkMetrics() {
@@ -535,6 +575,8 @@ function getNetworkMetrics() {
                     const bandwidth = (bytesSent + bytesReceived) * 8 / (stat.totalRoundTripTime * 1000);
                     const bandwidth_mbps = bandwidth * 1e-6;
                     console.log('Estimated Bandwidth:', bandwidth.toFixed(2), 'bps');
+
+                    dynamicUpdateResolution((bytesSent) * 8 / (stat.totalRoundTripTime * 1000));
 
                     // rtt
                     const roundTripTime = parseFloat(stat.currentRoundTripTime);
