@@ -22,6 +22,7 @@ const imageDownloadButton = document.getElementById('imageDownloadButton');
 const currentUserID = document.getElementById('currentUserID');
 const enableVideoButton = document.getElementById('enableVideoButton');
 const enableAudioButton = document.getElementById('enableAudioButton');
+const volumeControlInput = document.getElementById('volumeControl');
 
 
 let roomNumber;
@@ -102,6 +103,14 @@ ws.addEventListener("message", (event) => {
     {
         updateVideoList(message);
     }
+});
+
+volumeControlInput.addEventListener('input', () => {
+    const val = volumeControlInput.value;
+    const localAudioTrack = localStream.getAudioTracks()[0];
+    const remoteAudioTrack = remoteStream.getAudioTracks()[0];
+    localAudioTrack.volume = 0;
+    remoteAudioTrack.volume = 0;
 });
 
 enableVideoButton.addEventListener("click", () => {
