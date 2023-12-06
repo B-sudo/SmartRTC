@@ -108,6 +108,7 @@ function handleText2Image(ws, data){
     console.log(data)
     const sent_room = ws.roomId;
     const sent_user = ws.userId;
+    let rcvd_msg = data.value;
 
     // Inform clients to disable their send buttons
     for (const client_ws of rooms.get(sent_room)) {
@@ -124,16 +125,21 @@ function handleText2Image(ws, data){
 
         // Broadcast the image URL to other users in the room
         for (const client_ws of rooms.get(sent_room)) {
-            sendTo(client_ws, { type: 'text2image-rcvd', fromUserId: sent_user, imageUrl });
+            sendTo(client_ws, { type: 'text2image-rcvd', fromUserId: sent_user, imageUrl, rcvd_msg });
         }
 
         
     });
 
-    // Inform clients to enable their send buttons when the Python file is done running
-    for (const client_ws of rooms.get(sent_room)) {
-        sendTo(client_ws, { type: 'enable-send-button' });
-    }
+    pythonProcess.on('exit', (code) => {
+        if (code === 0) {
+            console.log('Python process exited successfully');
+            for (const client_ws of rooms.get(sent_room)) {
+                sendTo(client_ws, { type: 'enable-send-button' });
+            }
+        } 
+    });
+
 
     pythonProcess.stderr.on('data', (data) => {
         console.error(`Error from Python script: ${data}`);
@@ -162,14 +168,19 @@ function handleImg2Img(ws, data){
 
         // Broadcast the image URL to other users in the room
         for (const client_ws of rooms.get(sent_room)) {
-            sendTo(client_ws, { type: 'img2img-rcvd', fromUserId: sent_user, imageUrl });
+            sendTo(client_ws, { type: 'img2img-rcvd', fromUserId: sent_user, imageUrl, rcvd_msg });
         }
     });
 
-    // Inform clients to enable their send buttons when the Python file is done running
-    for (const client_ws of rooms.get(sent_room)) {
-        sendTo(client_ws, { type: 'enable-send-button' });
-    }
+    pythonProcess.on('exit', (code) => {
+        if (code === 0) {
+            console.log('Python process exited successfully');
+            for (const client_ws of rooms.get(sent_room)) {
+                sendTo(client_ws, { type: 'enable-send-button' });
+            }
+        } 
+    });
+
 
     pythonProcess.stderr.on('data', (data) => {
         console.error(`Error from Python script: ${data}`);

@@ -99,14 +99,18 @@ ws.addEventListener("message", (event) => {
     }
     else if (message.type === 'text2image-rcvd' || message.type === 'img2img-rcvd') {
         updateWhiteBoard(message);
-        text2ImgButton.disabled = false;
-        img2ImgButton.disabled = false;
     }
     else if (message.type === 'disable-send-button') {
         text2ImgButton.disabled = true;
         img2ImgButton.disabled = true;
+        text2ImgButton.classList.add('video-audio-disable');
+        img2ImgButton.classList.add('video-audio-disable');
     }
     else if (message.type === 'enable-send-button') {
+        text2ImgButton.disabled = false;
+        img2ImgButton.disabled = false;
+        text2ImgButton.classList.remove('video-audio-disable');
+        img2ImgButton.classList.remove('video-audio-disable');
     }
     else if (message.type === 'user-left')
     {
@@ -262,8 +266,10 @@ function updateVideoList(message) {
 }
 
 function updateWhiteBoard(message) {
-    console.log(message)
-    text2ImgImage.src = message.imageUrl
+    console.log(message);
+    text2ImgImage.src = message.imageUrl;
+    text2ImgInput.placeholder = `User-${message.fromUserId} is typing "${message.rcvd_msg}"`;
+    img2ImgInput.placeholder = `User-${message.fromUserId} is typing "${message.rcvd_msg}"`;
 }
 
 // Update the active user list on the client
