@@ -129,9 +129,9 @@ createRoomButton.addEventListener("click", () => {
 
 joinRoomButton.addEventListener("click", () => {
     // input validation
-    const roomNumber = roomNumberInput.value;
-    const parsedInt = parseInt(roomNumber, 10);
-    if (roomNumber.trim() === '' || isNaN(parsedInt) || !Number.isInteger(parsedInt))
+    const roomnumber = roomNumberInput.value;
+    const parsedInt = parseInt(roomnumber, 10);
+    if (roomnumber.trim() === '' || isNaN(parsedInt) || !Number.isInteger(parsedInt))
     {
         invalidInfo.classList.remove("invalid-text-hidden");
         invalidInfo.textContent = "Invalid room number!";
@@ -143,11 +143,12 @@ joinRoomButton.addEventListener("click", () => {
     /*invalidInfo.classList.add("invalid-text-hidden");
     createRoomButton.disabled = true;
     joinRoomButton.disabled = true;
-    roomNumberInput.disabled = true;*/
+    roomnumberInput.disabled = true;*/
 
     // Send a "join" message to the server
-    //console.log(`Client joined room ${roomNumber}`);
-    ws.send(JSON.stringify({ type: 'join', room: roomNumber }));
+    //console.log(`Client joined room ${roomnumber}`);
+    ws.send(JSON.stringify({ type: 'join', room: roomnumber }));
+    roomNumber = roomnumber;
     //setupLocalMedia();
 
 });
@@ -163,7 +164,8 @@ sendMessageButton.addEventListener("click", () => {
 });
 
 imageDownloadButton.addEventListener('click', () => {
-    window.open(`/public/assets/${roomNumber}/images`);
+    console.log('roomNumber: ', roomNumber);
+    window.open(`/assets/${roomNumber}/images`);
 });
 
 function updateVideoList(message) {

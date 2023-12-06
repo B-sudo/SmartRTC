@@ -232,8 +232,9 @@ function sendTo(ws, message) {
 
 
 // Define a route to download the zipped directory
-app.get('/public/assets/:roomId/images', (req, res) => {
+app.get('/assets/:roomId/images', (req, res) => {
     const roomId = req.params.roomId;
+    console.log('Current roomId: ', roomId);
     const directoryPath = path.join(__dirname, `public/assets/${roomId}/images`);
     const zipFilePath = path.join(__dirname, `public/assets/${roomId}/images.zip`);
 
