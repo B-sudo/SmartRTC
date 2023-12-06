@@ -20,6 +20,8 @@ const img2ImgButton = document.getElementById("img2imgButton");
 const img2ImgInput = document.getElementById("img2imgInput");
 const imageDownloadButton = document.getElementById('imageDownloadButton');
 const currentUserID = document.getElementById('currentUserID');
+const enableVideoButton = document.getElementById('enableVideoButton');
+const enableAudioButton = document.getElementById('enableAudioButton');
 
 
 let roomNumber;
@@ -114,6 +116,41 @@ ws.addEventListener("close", () => {
     console.log('Disconnected from the signaling server');
 });
 
+enableVideoButton.addEventListener("click", () => {
+    if (localStream) {
+        const localVideoTrack = localStream.getVideoTracks()[0];
+        const enable = localVideoTrack.enabled;
+        if (enable)
+            enableVideoButton.classList.add('video-audio-disable');
+        else
+            enableVideoButton.classList.remove('video-audio-disable');
+        localVideoTrack.enabled = !localVideoTrack.enabled;
+    }
+
+    if (remoteStream)
+    {
+        const remoteVideoTrack = remoteStream.getVideoTracks()[0];
+        remoteVideoTrack.enabled = !remoteVideoTrack.enabled;
+    }
+});
+
+enableAudioButton.addEventListener("click", () => {
+    if (localStream) {
+        const localAudioTrack = localStream.getAudioTracks()[0];
+        const enable = localAudioTrack.enabled;
+        if (enable)
+            enableAudioButton.classList.add('video-audio-disable');
+        else
+            enableAudioButton.classList.remove('video-audio-disable');
+        localAudioTrack.enabled = !localAudioTrack.enabled;
+    }
+
+    if (remoteStream)
+    {
+        const remoteAudioTrack = remoteStream.getAudioTracks()[0];
+        remoteAudioTrack.enabled = !remoteAudioTrack.enabled;
+    }
+});
 
 text2ImgButton.addEventListener("click", () => {
     ws.send(JSON.stringify({ type: 'text2image-sent', value: text2ImgInput.value }));
