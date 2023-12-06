@@ -20,9 +20,6 @@ const img2ImgButton = document.getElementById("img2imgButton");
 const img2ImgInput = document.getElementById("img2imgInput");
 const imageDownloadButton = document.getElementById('imageDownloadButton');
 const currentUserID = document.getElementById('currentUserID');
-const enableVideoButton = document.getElementById('enableVideoButton');
-const enableAudioButton = document.getElementById('enableAudioButton');
-const volumeControlInput = document.getElementById('volumeControl');
 
 
 let roomNumber;
@@ -99,46 +96,18 @@ ws.addEventListener("message", (event) => {
     else if (message.type === 'text2image-rcvd' || message.type === 'img2img-rcvd') {
         updateWhiteBoard(message);
     }
+    else if (message.type === 'disable-send-button') {
+        text2ImgButton.disabled = true;
+        img2ImgButton.disabled = true;
+    }
+    else if (message.type === 'enable-send-button') {
+        text2ImgButton.disabled = false;
+        img2ImgButton.disabled = false;
+    }
     else if (message.type === 'user-left')
     {
         updateVideoList(message);
     }
-});
-
-volumeControlInput.addEventListener('input', () => {
-    const val = volumeControlInput.value;
-    const localAudioTrack = localStream.getAudioTracks()[0];
-    const remoteAudioTrack = remoteStream.getAudioTracks()[0];
-    localAudioTrack.volume = 0;
-    remoteAudioTrack.volume = 0;
-});
-
-enableVideoButton.addEventListener("click", () => {
-    const localVideoTrack = localStream.getVideoTracks()[0];
-    const remoteVideoTrack = remoteStream.getVideoTracks()[0];
-
-    const enable = localVideoTrack.enabled;
-    if (enable === true)
-        enableVideoButton.classList.add('video-audio-disable');
-    else
-        enableVideoButton.classList.remove('video-audio-disable');
-
-    localVideoTrack.enabled = !localVideoTrack.enabled;
-    remoteVideoTrack.enabled = !remoteVideoTrack.enabled;
-});
-
-enableAudioButton.addEventListener("click", () => {
-    const localAudioTrack = localStream.getAudioTracks()[0];
-    const remoteAudioTrack = remoteStream.getAudioTracks()[0];
-
-    const enable = localAudioTrack.enabled;
-    if (enable === true)
-        enableAudioButton.classList.add('video-audio-disable');
-    else
-        enableAudioButton.classList.remove('video-audio-disable');
-
-    remoteAudioTrack.enabled = !remoteAudioTrack.enabled;
-    localAudioTrack.enabled = !localAudioTrack.enabled;
 });
 
 ws.addEventListener("close", () => {
@@ -168,9 +137,9 @@ createRoomButton.addEventListener("click", () => {
 
 joinRoomButton.addEventListener("click", () => {
     // input validation
-    const roomnumber = roomNumberInput.value;
-    const parsedInt = parseInt(roomnumber, 10);
-    if (roomnumber.trim() === '' || isNaN(parsedInt) || !Number.isInteger(parsedInt))
+    const roomNumber = roomNumberInput.value;
+    const parsedInt = parseInt(roomNumber, 10);
+    if (roomNumber.trim() === '' || isNaN(parsedInt) || !Number.isInteger(parsedInt))
     {
         invalidInfo.classList.remove("invalid-text-hidden");
         invalidInfo.textContent = "Invalid room number!";
@@ -182,12 +151,11 @@ joinRoomButton.addEventListener("click", () => {
     /*invalidInfo.classList.add("invalid-text-hidden");
     createRoomButton.disabled = true;
     joinRoomButton.disabled = true;
-    roomnumberInput.disabled = true;*/
+    roomNumberInput.disabled = true;*/
 
     // Send a "join" message to the server
-    //console.log(`Client joined room ${roomnumber}`);
-    ws.send(JSON.stringify({ type: 'join', room: roomnumber }));
-    roomNumber = roomnumber;
+    //console.log(`Client joined room ${roomNumber}`);
+    ws.send(JSON.stringify({ type: 'join', room: roomNumber }));
     //setupLocalMedia();
 
 });
@@ -203,8 +171,7 @@ sendMessageButton.addEventListener("click", () => {
 });
 
 imageDownloadButton.addEventListener('click', () => {
-    console.log('roomNumber: ', roomNumber);
-    window.open(`/assets/${roomNumber}/images`);
+    window.open(`/public/assets/${roomNumber}/images`);
 });
 
 function updateVideoList(message) {

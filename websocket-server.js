@@ -109,9 +109,13 @@ function handleText2Image(ws, data){
     const sent_room = ws.roomId;
     const sent_user = ws.userId;
 
+    // Inform clients to disable their send buttons
+    for (const client_ws of rooms.get(sent_room)) {
+        sendTo(client_ws, { type: 'disable-send-button' });
+    }
+
     // Activate conda environment and run
     const pythonProcess = spawn('conda', ['run', '-n', 'smartRTC', 'python', 'text_to_image.py', data.value, sent_room]);
-
 
     pythonProcess.stdout.on('data', (data) => {
         const lines = data.toString().split('\n');
@@ -122,7 +126,14 @@ function handleText2Image(ws, data){
         for (const client_ws of rooms.get(sent_room)) {
             sendTo(client_ws, { type: 'text2image-rcvd', fromUserId: sent_user, imageUrl });
         }
+
+        
     });
+
+    // Inform clients to enable their send buttons when the Python file is done running
+    for (const client_ws of rooms.get(sent_room)) {
+        sendTo(client_ws, { type: 'enable-send-button' });
+    }
 
     pythonProcess.stderr.on('data', (data) => {
         console.error(`Error from Python script: ${data}`);
@@ -135,6 +146,11 @@ function handleImg2Img(ws, data){
     console.log(data)
     const sent_room = ws.roomId;
     const sent_user = ws.userId;
+
+    // Inform clients to disable their send buttons
+    for (const client_ws of rooms.get(sent_room)) {
+        sendTo(client_ws, { type: 'disable-send-button' });
+    }
 
     // Activate conda environment and run
     const pythonProcess = spawn('conda', ['run', '-n', 'smartRTC', 'python', 'image_to_image.py', imageUrl, data.value]);
@@ -149,6 +165,11 @@ function handleImg2Img(ws, data){
             sendTo(client_ws, { type: 'img2img-rcvd', fromUserId: sent_user, imageUrl });
         }
     });
+
+    // Inform clients to enable their send buttons when the Python file is done running
+    for (const client_ws of rooms.get(sent_room)) {
+        sendTo(client_ws, { type: 'enable-send-button' });
+    }
 
     pythonProcess.stderr.on('data', (data) => {
         console.error(`Error from Python script: ${data}`);
