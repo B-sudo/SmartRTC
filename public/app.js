@@ -48,7 +48,9 @@ let mbps, fps, bandwidth_mbps, roundTripTime, jitter, pkt_loss_rate;
 
 /** variables for output metric*/
 let timePassSinceConnected = 0;
+const totalTime = 40;  // 2 mins
 const metricArray = []
+let currUserNum;
 
 const ws = new WebSocket(serverURL);
 
@@ -650,9 +652,11 @@ function getNetworkMetrics() {
 
     dynamicUpdateResolution(maxBandwidth / remoteVideo.childElementCount);
 
+
     for (const [key, value] of peerConnections.entries()) {
 
         timePassSinceConnected++;
+        currUserNum = peerConnections.size + 1;
 
         const videoSender = value.getSenders().find(sender => sender.track.kind === 'video');
         videoSender.getStats().then(stats => {
@@ -745,11 +749,12 @@ function getNetworkMetrics() {
             bandwidth: bandwidth_mbps.toFixed(2),
             rtt: roundTripTime,
             jitter: jitter.toFixed(2),
-            time: timePassSinceConnected
+            time: timePassSinceConnected,
+            userNum: currUserNum
         };
         metricArray.push(metric_item);
 
-        if (timePassSinceConnected == 5)
+        if (timePassSinceConnected === totalTime)
         {
             console.log('--------------send log-------');
             ws.send(JSON.stringify({ type: 'metric-log', value: metricArray }));
@@ -770,5 +775,5 @@ function probeResolution() {
 
 }*/
 
-setInterval(getNetworkMetrics, 4000);
+setInterval(getNetworkMetrics, 2000);  // 4000
 //setInterval(probeResolution, 9000);

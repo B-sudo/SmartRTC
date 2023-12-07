@@ -51,6 +51,11 @@ function handleMetricLogs(ws, data) {
     // console.log(userId);
     // console.log(data);
 
+    // add header
+    let file_path = `metrics_${userId}.csv`;
+    const csvRow = `time_slot,fps,pkt_loss_rate,bit_rate,bandwidth,rtt,jitter,user_num\n`;
+    fs.appendFileSync(file_path, csvRow, 'utf8');
+
     logs.forEach(log => {
         const time_passed = log.time;
         const fps = log.fps;
@@ -59,10 +64,9 @@ function handleMetricLogs(ws, data) {
         const bandwidth = log.bandwidth;
         const rtt = log.rtt;
         const jitter = log.jitter;
+        const user_num = log.userNum;
 
-        const csvRow = `${time_passed},${fps},${pkt_loss_rate},${bit_rate},${bandwidth},${rtt},${jitter}\n`;
-
-        let file_path = `metrics_${userId}.csv`;
+        const csvRow = `${time_passed},${fps},${pkt_loss_rate},${bit_rate},${bandwidth},${rtt},${jitter},${user_num}\n`;
         fs.appendFileSync(file_path, csvRow, 'utf8');
     });
     console.log(`save metric log to ${file_path}`);
