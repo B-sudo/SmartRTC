@@ -724,7 +724,9 @@ function getNetworkMetrics() {
                 })
             })
 
-        console.log(`Delta Package Loss: ${(remotePktLoss - remotePktLossOld)/(localPktSent / localPktSentOld)}`);
+        const pkt_loss = (remotePktLoss - remotePktLossOld)/(localPktSent - localPktSentOld);
+        const pkt_loss_rate = pkt_loss * 100;
+        console.log(`Delta Package Loss: ${pkt_loss_rate.toFixed(2)}%`);
 
         break;
     }
