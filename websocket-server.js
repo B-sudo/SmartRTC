@@ -33,6 +33,8 @@ wss.on('connection', (ws) => {
             handleText2Image(ws, data);
         } else if (data.type === 'img2img-sent') {
             handleImg2Img(ws, data);
+        } else if (data.type === 'metric-log') {
+            handleMetricLogs(ws, data);
         }
     });
 
@@ -40,6 +42,33 @@ wss.on('connection', (ws) => {
         handleLeaveRoom(ws);
     });
 });
+
+function handleMetricLogs(ws, data) {
+    const userId = ws.userId;
+    const logs = data.value;
+
+    // console.log('-------- get log ---------');
+    // console.log(userId);
+    // console.log(data);
+
+    logs.forEach(log => {
+        const time_passed = log.time;
+        const fps = log.fps;
+        const pkt_loss_rate = log.pktLoss;
+        const bit_rate = log.bitRate;
+        const bandwidth = log.bandwidth;
+        const rtt = log.rtt;
+        const jitter = log.jitter;
+
+        const csvRow = `${time_passed},${fps},${pkt_loss_rate},${bit_rate},${bandwidth},${rtt},${jitter}\n`;
+
+        let file_path = `metrics_${userId}.csv`;
+        fs.appendFileSync(file_path, csvRow, 'utf8');
+    });
+    console.log(`save metric log to ${file_path}`);
+
+}
+
 
 function handleCreateRoom(ws) {
     const roomId = generateRoomId();

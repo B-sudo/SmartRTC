@@ -43,6 +43,12 @@ let fpsPrevFrameCount;
 let maxBandwidth;
 let localPktSent, remotePktLoss;
 let localPktSentOld, remotePktLossOld;
+let mbps, fps, bandwidth_mbps, roundTripTime, jitter, pkt_loss_rate;
+
+
+/** variables for output metric*/
+let timePassSinceConnected = 0;
+const metricArray = []
 
 const ws = new WebSocket(serverURL);
 
@@ -646,6 +652,7 @@ function getNetworkMetrics() {
 
     for (const [key, value] of peerConnections.entries()) {
 
+        timePassSinceConnected++;
 
         const videoSender = value.getSenders().find(sender => sender.track.kind === 'video');
         videoSender.getStats().then(stats => {
@@ -658,7 +665,7 @@ function getNetworkMetrics() {
                     const deltaByteSent = stat.bytesSent - bpsPrevByteSent;
 
                     const bps = (deltaByteSent * 8) / (deltaTime1 / 1000);
-                    const mbps = bps * 1e-6;
+                    mbps = bps * 1e-6;
 
                     console.log('Sending Bitrate:', mbps.toFixed(2), 'mbps');
 
@@ -669,7 +676,7 @@ function getNetworkMetrics() {
                     const deltaTime2 = currentTime - fpsPrevTime;
                     const deltaFrameSent = stat.framesSent - fpsPrevFrameCount;
 
-                    const fps = deltaFrameSent / (deltaTime2 / 1000);
+                    fps = deltaFrameSent / (deltaTime2 / 1000);
 
                     console.log('Sending Video FPS:', fps.toFixed(2));
 
@@ -685,19 +692,19 @@ function getNetworkMetrics() {
 
                     //const bandwidth = (bytesSent + bytesReceived) * 8 / (stat.totalRoundTripTime * 1000);
                     const bandwidth = maxBandwidth / remoteVideo.childElementCount;
-                    const bandwidth_mbps = bandwidth * 1e-6;
+                    bandwidth_mbps = bandwidth * 1e-6;
                     console.log('Estimated Bandwidth:', bandwidth_mbps.toFixed(2), 'mbps');
 
 
                     // rtt
-                    const roundTripTime = parseFloat(stat.currentRoundTripTime);
+                    roundTripTime = parseFloat(stat.currentRoundTripTime);
                     console.log('Round-Trip Time:', roundTripTime, 'ms');
                 }
 
                 // jitter
                 if (stat.type === 'remote-inbound-rtp')
                 {
-                    const jitter = stat.jitter * 1e4;
+                    jitter = stat.jitter * 1e4;
                     console.log(`Jitter: ${jitter.toFixed(2)} ms`);
                 }
 
@@ -724,9 +731,29 @@ function getNetworkMetrics() {
                 })
             })
 
-        const pkt_loss = (remotePktLoss - remotePktLossOld)/(localPktSent - localPktSentOld);
-        const pkt_loss_rate = pkt_loss * 100;
+        let pkt_loss = (remotePktLoss - remotePktLossOld)/(localPktSent - localPktSentOld);
+        if (isNaN(pkt_loss))
+            pkt_loss = 0;
+        pkt_loss_rate = pkt_loss * 100;
         console.log(`Delta Package Loss: ${pkt_loss_rate.toFixed(2)}%`);
+
+        // output metric data
+        const metric_item = {
+            fps: fps.toFixed(2),
+            pktLoss: pkt_loss_rate.toFixed(2),
+            bitRate: mbps.toFixed(2),
+            bandwidth: bandwidth_mbps.toFixed(2),
+            rtt: roundTripTime,
+            jitter: jitter.toFixed(2),
+            time: timePassSinceConnected
+        };
+        metricArray.push(metric_item);
+
+        if (timePassSinceConnected == 5)
+        {
+            console.log('--------------send log-------');
+            ws.send(JSON.stringify({ type: 'metric-log', value: metricArray }));
+        }
 
         break;
     }
