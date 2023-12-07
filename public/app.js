@@ -330,6 +330,7 @@ function setupLocalMedia() {
 }*/
 
 let remoteVideoTrack;
+let remoteAudioTrack;
 let localVideoTrack;
 
 async function setupLocalMedia() {
@@ -395,9 +396,10 @@ async function changeVideoResolution(newWidth, newHeight) {
             height: {ideal: newHeight},
         },});
         console.log('Received local stream');
-  
+        remotestream.getVideoTracks()[0].enabled = isAudioEnable;
         // Save the local video track for later use
         remoteVideoTrack = remotestream.getVideoTracks()[0];
+        remoteAudioTrack = remotestream.getAudioTracks()[0];
 
         remoteStream = remotestream;
 
@@ -408,6 +410,8 @@ async function changeVideoResolution(newWidth, newHeight) {
         for (const [key, peerConnection] of peerConnections.entries()) {
             const videoSender = peerConnection.getSenders().find(sender => sender.track.kind === 'video');
             videoSender.replaceTrack(remoteVideoTrack);
+            const audioSender = peerConnection.getSenders().find(sender => sender.track.kind === 'audio');
+            audioSender.replaceTrack(remoteAudioTrack);
         }
         // Now, call sendOffer again with the updated resolution information
         //for (const [key, peerConnection] of peerConnections.entries()) {
