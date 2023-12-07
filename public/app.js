@@ -596,7 +596,7 @@ let sendBandwidthLevel = 5;
 
 function dynamicUpdateResolution(bandwidth) {
     //estimated R = 0.5; 0.6Mbps = 200*200*30
-    const ratio = 480.0 / 360.0;
+    const ratio = 360.0 / 480.0;
 
     if (remoteVideo) {
         const activeUsersCount = remoteVideo.childElementCount;
