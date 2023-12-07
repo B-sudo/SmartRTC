@@ -118,6 +118,7 @@ input, input:focus {
 .msg-input {
     /*margin-top: 15px;*/
     width: 80%;
+    height: fit-content;
 }
 
 .msg-button {
@@ -219,6 +220,10 @@ input, input:focus {
 
 .volume-control-bar:hover {
     cursor: pointer;
+}
+
+.media-control-button {
+    width: 3rem;
 }
 
 

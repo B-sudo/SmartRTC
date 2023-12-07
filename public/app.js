@@ -66,6 +66,14 @@ ws.addEventListener("message", (event) => {
         // set user id
         currentUserID.textContent = userId;
 
+        // set ui
+        createRoomButton.disabled = true;
+        joinRoomButton.disabled = true;
+        roomNumberInput.value = roomNumber;
+        roomNumberInput.disabled = true;
+        createRoomButton.classList.add('video-audio-disable');
+        joinRoomButton.classList.add('video-audio-disable');
+
         // enable room elements
         chatSection.classList.remove("chat-section-hidden");
         text2ImgSection.classList.remove("text2image-section-hidden");
@@ -78,10 +86,13 @@ ws.addEventListener("message", (event) => {
         // set user id
         currentUserID.textContent = userId;
 
+        // set ui
         createRoomButton.disabled = true;
         joinRoomButton.disabled = true;
         roomNumberInput.disabled = true;
         invalidInfo.classList.add("invalid-text-hidden");
+        createRoomButton.classList.add('video-audio-disable');
+        joinRoomButton.classList.add('video-audio-disable');
 
         // enable room elements
         chatSection.classList.remove("chat-section-hidden");
@@ -201,9 +212,6 @@ img2ImgButton.addEventListener("click", () => {
 createRoomButton.addEventListener("click", () => {
     // Send a "create-room" message to the server
     ws.send(JSON.stringify({ type: 'create-room' }));
-    createRoomButton.disabled = true;
-    joinRoomButton.disabled = true;
-    roomNumberInput.disabled = true;
     //setupLocalMedia();
     //createPeerConnection();
 });
