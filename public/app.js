@@ -626,6 +626,9 @@ function getNetworkMetrics() {
       }
 
     for (const [key, value] of peerConnections.entries()) {
+
+        let localPktSent, remotePktLoss;
+
         const videoSender = value.getSenders().find(sender => sender.track.kind === 'video');
         videoSender.getStats().then(stats => {
             stats.forEach(stat => {
@@ -665,36 +668,44 @@ function getNetworkMetrics() {
                     //const bandwidth = (bytesSent + bytesReceived) * 8 / (stat.totalRoundTripTime * 1000);
                     const bandwidth = maxBandwidth / remoteVideo.childElementCount;
                     const bandwidth_mbps = bandwidth * 1e-6;
-                    console.log('Estimated Bandwidth:', bandwidth.toFixed(2), 'bps');
+                    console.log('Estimated Bandwidth:', bandwidth_mbps.toFixed(2), 'mbps');
 
                     dynamicUpdateResolution(bandwidth);
 
                     // rtt
                     const roundTripTime = parseFloat(stat.currentRoundTripTime);
                     console.log('Round-Trip Time:', roundTripTime, 'ms');
-
-                    // packet loss rate
-                    const pktSent = stat.packetsSent;
-                    const pktLost = isNaN(stat.packetsLost) ? 0 : stat.packetsLost;
-
-                    const packetLossRate = (pktLost / pktSent) * 100;
-                    console.log('Packet Loss Rate:', packetLossRate.toFixed(0), '%');
                 }
 
-                if (stat.type === 'inbound-rtp' || stat.type === 'outbound-rtp') {
-
-                    // jitter
-                    const jitter = stat.jitter;
-
-                    if (!isNaN(jitter)) {
-                        console.log('Jitter:', jitter.toFixed(2), 'ms');
-                    }
-                    else {
-                        console.log('Jitter:', 0, 'ms');
-                    }
+                // jitter
+                if (stat.type === 'remote-inbound-rtp')
+                {
+                    const jitter = stat.jitter * 1e4;
+                    console.log(`Jitter: ${jitter.toFixed(2)} ms`);
                 }
+
             });
         });
+
+        // packet loss rate
+        value.getStats()
+            .then(stats => {
+                stats.forEach(report => {
+                    if (report.type === 'remote-inbound-rtp' && report.kind === 'video')
+                    {
+                        remotePktLoss = report.packetsLost;
+                        console.log(`Packet Loss: ${remotePktLoss}`);
+                    }
+
+                    if (report.type == 'outbound-rtp' && report.kind === 'video')
+                    {
+                        localPktSent = report.packetsSent;
+                        console.log(`Packet Sent: ${localPktSent}`);
+                    }
+                })
+            })
+
+
         break;
     }
 }

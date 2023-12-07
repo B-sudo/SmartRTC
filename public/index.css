@@ -181,7 +181,8 @@ input, input:focus {
     font-size: 20px;
     color: #ffffff;
     background-color: #050505;
-    padding: 2px;
+    line-height: 2rem;
+    padding: 0px 10px;
 }
 
 .self-control-content {
