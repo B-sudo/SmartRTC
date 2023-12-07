@@ -41,6 +41,8 @@ let bpsPrevTime;
 let bpsPrevByteSent;
 let fpsPrevFrameCount;
 let maxBandwidth;
+let localPktSent, remotePktLoss;
+let localPktSentOld, remotePktLossOld;
 
 const ws = new WebSocket(serverURL);
 
@@ -396,7 +398,7 @@ async function changeVideoResolution(newWidth, newHeight) {
             height: {ideal: newHeight},
         },});
         console.log('Received local stream');
-        remotestream.getVideoTracks()[0].enabled = isAudioEnable;
+        remotestream.getAudioTracks()[0].enabled = isAudioEnable;
         // Save the local video track for later use
         remoteVideoTrack = remotestream.getVideoTracks()[0];
         remoteAudioTrack = remotestream.getAudioTracks()[0];
@@ -630,9 +632,10 @@ function getNetworkMetrics() {
         console.log(`Downlink speed: ${connection.downlink} Mbps`);
       }
 
+    dynamicUpdateResolution(maxBandwidth / remoteVideo.childElementCount);
+
     for (const [key, value] of peerConnections.entries()) {
 
-        let localPktSent, remotePktLoss;
 
         const videoSender = value.getSenders().find(sender => sender.track.kind === 'video');
         videoSender.getStats().then(stats => {
@@ -675,7 +678,6 @@ function getNetworkMetrics() {
                     const bandwidth_mbps = bandwidth * 1e-6;
                     console.log('Estimated Bandwidth:', bandwidth_mbps.toFixed(2), 'mbps');
 
-                    dynamicUpdateResolution(bandwidth);
 
                     // rtt
                     const roundTripTime = parseFloat(stat.currentRoundTripTime);
@@ -698,18 +700,21 @@ function getNetworkMetrics() {
                 stats.forEach(report => {
                     if (report.type === 'remote-inbound-rtp' && report.kind === 'video')
                     {
+                        remotePktLossOld = remotePktLoss;
                         remotePktLoss = report.packetsLost;
                         console.log(`Packet Loss: ${remotePktLoss}`);
                     }
 
                     if (report.type == 'outbound-rtp' && report.kind === 'video')
                     {
+                        localPktSentOld = localPktSent;
                         localPktSent = report.packetsSent;
                         console.log(`Packet Sent: ${localPktSent}`);
                     }
                 })
             })
 
+        console.log(`Delta Package Loss: ${(remotePktLoss - remotePktLossOld)/(localPktSent / localPktSentOld)}`);
 
         break;
     }
