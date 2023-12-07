@@ -388,8 +388,8 @@ async function changeVideoResolution(newWidth, newHeight) {
         //    },
         //}).then(mediaStream => mediaStream.getVideoTracks()[0]);
 
-
-        const remotestream = await navigator.mediaDevices.getUserMedia({audio: true, video: {
+        const isAudioEnable = localStream.getAudioTracks()[0].enabled;
+        const remotestream = await navigator.mediaDevices.getUserMedia({audio: isAudioEnable, video: {
             width: {ideal: newWidth},
             height: {ideal: newHeight},
         },});
