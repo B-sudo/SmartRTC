@@ -112,7 +112,7 @@ function handleText2Image(ws, data){
 
     // Inform clients to disable their send buttons
     for (const client_ws of rooms.get(sent_room)) {
-        sendTo(client_ws, { type: 'disable-send-button' });
+        sendTo(client_ws, { type: 'disable-send-button', fromUserId: sent_user, rcvd_msg });
     }
 
     // Activate conda environment and run
@@ -125,7 +125,7 @@ function handleText2Image(ws, data){
 
         // Broadcast the image URL to other users in the room
         for (const client_ws of rooms.get(sent_room)) {
-            sendTo(client_ws, { type: 'text2image-rcvd', fromUserId: sent_user, imageUrl, rcvd_msg });
+            sendTo(client_ws, { type: 'text2image-rcvd', fromUserId: sent_user, imageUrl });
         }
 
         
@@ -156,7 +156,7 @@ function handleImg2Img(ws, data){
 
     // Inform clients to disable their send buttons
     for (const client_ws of rooms.get(sent_room)) {
-        sendTo(client_ws, { type: 'disable-send-button' });
+        sendTo(client_ws, { type: 'disable-send-button', fromUserId: sent_user, rcvd_msg });
     }
 
     // Activate conda environment and run
@@ -169,7 +169,7 @@ function handleImg2Img(ws, data){
 
         // Broadcast the image URL to other users in the room
         for (const client_ws of rooms.get(sent_room)) {
-            sendTo(client_ws, { type: 'img2img-rcvd', fromUserId: sent_user, imageUrl, rcvd_msg });
+            sendTo(client_ws, { type: 'img2img-rcvd', fromUserId: sent_user, imageUrl });
         }
     });
 

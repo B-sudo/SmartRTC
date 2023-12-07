@@ -105,6 +105,8 @@ ws.addEventListener("message", (event) => {
         img2ImgButton.disabled = true;
         text2ImgButton.classList.add('video-audio-disable');
         img2ImgButton.classList.add('video-audio-disable');
+        text2ImgInput.placeholder = `User-${message.fromUserId} is typing "${message.rcvd_msg}"`;
+        img2ImgInput.placeholder = `User-${message.fromUserId} is typing "${message.rcvd_msg}"`;
     }
     else if (message.type === 'enable-send-button') {
         text2ImgButton.disabled = false;
@@ -268,8 +270,7 @@ function updateVideoList(message) {
 function updateWhiteBoard(message) {
     console.log(message);
     text2ImgImage.src = message.imageUrl;
-    text2ImgInput.placeholder = `User-${message.fromUserId} is typing "${message.rcvd_msg}"`;
-    img2ImgInput.placeholder = `User-${message.fromUserId} is typing "${message.rcvd_msg}"`;
+    
 }
 
 // Update the active user list on the client
