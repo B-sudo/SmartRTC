@@ -602,27 +602,27 @@ function dynamicUpdateResolution(bandwidth) {
         const activeUsersCount = remoteVideo.childElementCount;
         const bandwidth_partition = bandwidth / activeUsersCount;
 
-        if (bandwidth_partition >= 3750000 && sendBandwidthLevel != 5) {
+        if (bandwidth_partition >= 3750000 * ratio && sendBandwidthLevel != 5) {
             sendBandwidthLevel = 5;
             changeVideoResolution(500, 500 * ratio);
         }
-        else if (bandwidth_partition < 3750000 && bandwidth_partition >= 2400000 && sendBandwidthLevel != 4) {
+        else if (bandwidth_partition < 3750000 * ratio && bandwidth_partition >= 2400000 * ratio && sendBandwidthLevel != 4) {
             sendBandwidthLevel = 4;
             changeVideoResolution(400, 400 * ratio);
         }
-        else if (bandwidth_partition < 2400000 && bandwidth_partition >= 1350000 && sendBandwidthLevel != 3) {
+        else if (bandwidth_partition < 2400000 * ratio && bandwidth_partition >= 1350000 * ratio && sendBandwidthLevel != 3) {
             sendBandwidthLevel = 3;
             changeVideoResolution(300, 300 * ratio);
         }
-        else if (bandwidth_partition < 1350000 && bandwidth_partition >= 600000 && sendBandwidthLevel != 2) {
+        else if (bandwidth_partition < 1350000 * ratio && bandwidth_partition >= 600000 * ratio && sendBandwidthLevel != 2) {
             sendBandwidthLevel = 2;
             changeVideoResolution(200, 200 * ratio);
         }
-        else if (bandwidth_partition < 600000 && bandwidth_partition >= 150000 && sendBandwidthLevel != 1) {
+        else if (bandwidth_partition < 600000 * ratio && bandwidth_partition >= 150000 * ratio && sendBandwidthLevel != 1) {
             sendBandwidthLevel = 1;
             changeVideoResolution(100, 100 * ratio);
         }
-        else if (bandwidth_partition < 150000 && sendBandwidthLevel != 0) {
+        else if (bandwidth_partition < 150000 * ratio && sendBandwidthLevel != 0) {
             sendBandwidthLevel = 0;
             changeVideoResolution(50, 50 * ratio);
         }
