@@ -152,6 +152,7 @@ function handleImg2Img(ws, data){
     console.log(data)
     const sent_room = ws.roomId;
     const sent_user = ws.userId;
+    let rcvd_msg = data.value;
 
     // Inform clients to disable their send buttons
     for (const client_ws of rooms.get(sent_room)) {
